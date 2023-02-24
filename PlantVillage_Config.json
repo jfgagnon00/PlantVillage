@@ -1,0 +1,7 @@
+{
+    "install": true,
+    "url": "https://tinyurl.com/22tas3na",
+    "install_path": "dataset",
+    "preprocess_path": "PlantVillage.csv",
+    "species_disease_re": "(.*)___(.*)"
+}
