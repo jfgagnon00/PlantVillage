@@ -1,4 +1,6 @@
+import cv2
 import json
+import math
 import os
 import re
 import requests
@@ -116,23 +118,43 @@ def _dataset_preprocess(dataset_config):
 
     for file in progress:
         image_path = os.path.normpath(file)
-        _, plant, image = image_path.split(os.sep)
+        folder, labels, file = image_path.split(os.sep)
 
-        progress.set_postfix_str( os.path.join(plant, image) )
+        progress.set_postfix_str( os.path.join(labels, file) )
 
-        match_ = species_disease_pattern.match(plant)
-        if match_ is None:
+        labels_match = species_disease_pattern.match(labels)
+        if labels_match is None:
             continue
 
-        plant_species, plant_disease = match_.groups()
-        data.append( (plant_species, plant_disease, image_path) )
+        plant_species, plant_disease = labels_match.groups()
+
+        image = cv2.imread(image_path)
+        h, w, _ = image.shape
+        th = math.ceil(h * dataset_config.thumbnail_scale)
+        tw = math.ceil(w * dataset_config.thumbnail_scale)
+        thumbnail = cv2.resize(image, (tw, th))
+
+        thumbnail_folder = os.path.join(folder, "thumbnails", labels)
+        thumbnail_path = os.path.join(thumbnail_folder, file)
+        os.makedirs(thumbnail_folder, exist_ok=True)
+        cv2.imwrite(thumbnail_path, thumbnail)
+
+        data.append( (plant_species,
+                      plant_disease,
+                      image_path,
+                      w,
+                      h,
+                      thumbnail_path) )
 
     progress.update()
 
     preprocessed_df = DataFrame(data,
                                 columns=["species",
                                          "disease",
-                                         "image_paths"])
+                                         "image_path",
+                                         "image_width",
+                                         "image_height",
+                                         "thumbnail_path"])
     preprocessed_df.to_csv(dataset_config.preprocess_path,
                            index=False,
                            quoting=QUOTE_NONNUMERIC)
@@ -161,7 +183,7 @@ def dataset_load_config(filename):
         return config
 
 
-def dataset_load(dataset_config):
+def dataset_load(dataset_config, **kwargs):
     """
     Utilitaire encapsulant installation et
     preprocessing d'un dataset
@@ -169,23 +191,32 @@ def dataset_load(dataset_config):
     dataset_config:
         Object retourne par dataset_load_config()
 
+    kwargs:
+        Voir _dataset_install
+
     Retour:
         Pandas.DataFrame representant le
         dataset ou None si probleme.
     """
     def dataset_read():
-        return read_csv(dataset_config.preprocess_path,
-                        quoting=QUOTE_NONNUMERIC)
+        df = read_csv(dataset_config.preprocess_path,
+                      quoting=QUOTE_NONNUMERIC)
+
+        # see https://tinyurl.com/3uywpnxp for details
+        df.image_width = df.image_width.astype(int)
+        df.image_height = df.image_height.astype(int)
+
+        return df
 
     if os.path.exists(dataset_config.preprocess_path):
         return dataset_read()
 
     if dataset_config.install and \
        not os.path.exists(dataset_config.install_path):
-        os.makedirs(dataset_config.install_path, exist_ok=True)
+        os.makedirs(dataset_config.install_path)
 
         display_html(f"<b>Installing Dataset</b>")
-        if not _dataset_install(dataset_config):
+        if not _dataset_install(dataset_config, kwargs=kwargs):
             display_html(f"<b>Dataset installation error</b>")
         else:
             display_html(f"<b>Dataset installed</b>")
