@@ -8,7 +8,7 @@ import time
 import zipfile
 
 from csv import QUOTE_NONNUMERIC
-from glob import glob
+from glob import iglob
 from jupyter_helpers import display_html
 from pandas import DataFrame, read_csv
 from tqdm.notebook import tqdm
@@ -105,22 +105,28 @@ def _dataset_install(dataset_config, **kwargs):
 
     return True
 
-def _dataset_preprocess(dataset_config):
-    species_disease_pattern = re.compile(dataset_config.species_disease_re)
+def _gather_files(dataset_config):
     dataset_files = os.path.join(dataset_config.install_path, "*", "*.*")
-    dataset_files = list(glob(dataset_files))
+    thumbbail_path = os.path.join(dataset_config.install_path, ".thumbnails")
+    dataset_files = [os.path.normpath(f)
+                     for f in iglob(dataset_files)
+                        if not thumbbail_path in f]
+    return list(dataset_files), thumbbail_path
+
+def _preprocess_csv(dataset_config,
+                    dataset_files,
+                    thumbbail_path):
+    data = []
+    species_disease_pattern = re.compile(dataset_config.species_disease_re)
     progress = tqdm(iterable=dataset_files,
                     total=len(dataset_files),
                     bar_format="{l_bar}{bar}{postfix}")
 
-    # data to preproces
-    data = []
+    for image_path in progress:
+        _, labels, file = image_path.split(os.sep)
+        sub_path = os.path.join(labels, file)
 
-    for file in progress:
-        image_path = os.path.normpath(file)
-        folder, labels, file = image_path.split(os.sep)
-
-        progress.set_postfix_str( os.path.join(labels, file) )
+        progress.set_postfix_str(sub_path)
 
         labels_match = species_disease_pattern.match(labels)
         if labels_match is None:
@@ -130,34 +136,66 @@ def _dataset_preprocess(dataset_config):
 
         image = cv2.imread(image_path)
         h, w, _ = image.shape
-        th = math.ceil(h * dataset_config.thumbnail_scale)
-        tw = math.ceil(w * dataset_config.thumbnail_scale)
-        thumbnail = cv2.resize(image, (tw, th))
+        thumbnail_file = os.path.join(thumbbail_path, sub_path)
 
-        thumbnail_folder = os.path.join(folder, "thumbnails", labels)
-        thumbnail_path = os.path.join(thumbnail_folder, file)
-        os.makedirs(thumbnail_folder, exist_ok=True)
-        cv2.imwrite(thumbnail_path, thumbnail)
+        # some elements do not respect nomenclature
+        # found in litterature: fix it
+        species_match = species_disease_pattern.match(plant_species)
+        if not species_match is None:
+            plant_species = dataset_config.label_separator.join(species_match.groups())
 
-        data.append( (plant_species,
-                      plant_disease,
+        if plant_species in plant_disease:
+            label = plant_disease
+        else:
+            label = dataset_config.label_separator.join([plant_species,
+                                                         plant_disease])
+
+        data.append( (label,
                       image_path,
+                      plant_species,
+                      plant_disease,
                       w,
                       h,
-                      thumbnail_path) )
+                      thumbnail_file) )
 
     progress.update()
 
     preprocessed_df = DataFrame(data,
-                                columns=["species",
-                                         "disease",
+                                columns=["label",
                                          "image_path",
+                                         "species",
+                                         "disease",
                                          "image_width",
                                          "image_height",
                                          "thumbnail_path"])
     preprocessed_df.to_csv(dataset_config.preprocess_path,
                            index=False,
                            quoting=QUOTE_NONNUMERIC)
+
+def _preprocess_thumbnail(dataset_config,
+                          dataset_files,
+                          thumbbail_path):
+    progress = tqdm(iterable=dataset_files,
+                    total=len(dataset_files),
+                    bar_format="{l_bar}{bar}{postfix}")
+
+    for image_path in progress:
+        _, labels, file = image_path.split(os.sep)
+
+        progress.set_postfix_str( os.path.join(labels, file) )
+
+        image = cv2.imread(image_path)
+        h, w, _ = image.shape
+        th = math.ceil(h * dataset_config.thumbnail_scale)
+        tw = math.ceil(w * dataset_config.thumbnail_scale)
+        thumbnail = cv2.resize(image, (tw, th))
+
+        thumbnail_folder = os.path.join(thumbbail_path, labels)
+        thumbnail_file = os.path.join(thumbnail_folder, file)
+        os.makedirs(thumbnail_folder, exist_ok=True)
+        cv2.imwrite(thumbnail_file, thumbnail)
+
+    progress.update()
 
 def dataset_load_config(filename):
     """
@@ -181,7 +219,6 @@ def dataset_load_config(filename):
         return None
     else:
         return config
-
 
 def dataset_load(dataset_config, **kwargs):
     """
@@ -223,7 +260,19 @@ def dataset_load(dataset_config, **kwargs):
     else:
         display_html(f"<b>Dataset already installed</b>")
 
-    display_html("<b>Dataset preprocessing</b>")
-    _dataset_preprocess(dataset_config)
+    dataset_files, thumbbail_path = _gather_files(dataset_config)
+
+    if not os.path.exists(thumbbail_path):
+        display_html("<b>Dataset preprocessing thumbnails</b>")
+        _preprocess_thumbnail(dataset_config,
+                                      dataset_files,
+                                      thumbbail_path)
+    else:
+        display_html("<b>Dataset thumbnails already preprocessed</b>")
+
+    display_html("<b>Dataset preprocessing csv</b>")
+    _preprocess_csv(dataset_config,
+                            dataset_files,
+                            thumbbail_path)
 
     return dataset_read()
