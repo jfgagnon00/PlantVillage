@@ -1,9 +1,10 @@
 {
-    "install": true,
-    "url": "https://tinyurl.com/22tas3na",
-    "install_path": "dataset",
-    "preprocess_path": "PlantVillage.csv",
-    "species_disease_re": "(.*)(?:___|,_)(.*)",
-    "label_separator": "_",
-    "thumbnail_scale": 0.25
+    "dataset": {
+        "force_install": true,
+        "url": "https://tinyurl.com/22tas3na",
+        "install_path": "dataset/PlantVillage.hd5",
+        "species_disease_re": "(.*)(?:___|,_)(.*)",
+        "label_separator": "_",
+        "thumbnail_scale": 0.25
+    }
 }

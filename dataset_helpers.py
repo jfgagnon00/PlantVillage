@@ -1,6 +1,8 @@
 import cv2
+import h5py
 import json
 import math
+import numpy as np
 import os
 import re
 import requests
@@ -14,12 +16,17 @@ from pandas import DataFrame, read_csv
 from tqdm.notebook import tqdm
 
 
+_IMAGES_KEY = "images"
+_THUMBNAILS_KEY = "thumbnail"
+_FEATURES_KEY = "features"
+
+
 def _get_default(kwargs, key, default_value):
     return default_value if kwargs is None else kwargs.get(key, default_value)
 
 def _download_with_progress(dest_path,
                            url,
-                           skip_download=False):
+                           force_download):
     try:
         r = requests.get(url, stream=True)
 
@@ -29,7 +36,7 @@ def _download_with_progress(dest_path,
         filename = filename.replace('"', "")
         filename = os.path.join(dest_path, filename)
 
-        if not skip_download:
+        if force_download or not os.path.exists(filename):
             with open(filename, "wb") as f:
                 progress = tqdm(total=content_size)
                 for data in r.iter_content(chunk_size=16*1024):
@@ -42,76 +49,91 @@ def _download_with_progress(dest_path,
     else:
         return filename
 
-def _unzip_with_progress(dest_path,
-                        filename,
-                        unzip_one_folder_up=True,
-                        skip_extract=False):
+def _h5extract_with_progress(h5_filename,
+                             zip_filename,
+                             force_extract,
+                             extract_one_folder_up):
     try:
-        with zipfile.ZipFile(file=filename) as zip_file:
-            infolist = zip_file.infolist()
-            progress = tqdm(iterable=infolist,
-                            total=len(infolist),
-                            bar_format="{l_bar}{bar}{postfix}")
+        with h5py.File(h5_filename, "a") as h5_file:
+            if _IMAGES_KEY in h5_file:
+                if force_extract:
+                    del h5_file[_IMAGES_KEY]
+                else:
+                    return True
 
-            for zip_info in progress:
-                # display filename in progress bar
-                # but without start folder
-                path, file = os.path.split(zip_info.filename)
-                _, path = os.path.split(path)
-                one_up_path = os.path.join(path, file)
+            h5_images = h5_file.create_group(_IMAGES_KEY)
+            with zipfile.ZipFile(file=zip_filename) as zip_file:
+                infolist = zip_file.infolist()
+                progress = tqdm(iterable=infolist,
+                                total=len(infolist),
+                                bar_format="{l_bar}{bar}{postfix}")
 
-                progress.set_postfix_str(one_up_path)
+                for zip_info in progress:
+                    # display filename in progress bar
+                    # but without start folder
+                    path, file = os.path.split(zip_info.filename)
+                    _, path = os.path.split(path)
+                    one_up_path = os.path.join(path, file)
 
-                if zip_info.is_dir():
-                    # pour eviter message d'erreur dans jupyter notebook
-                    time.sleep(0.01)
-                    continue
+                    progress.set_postfix_str(one_up_path)
 
-                if unzip_one_folder_up:
-                    zip_info.filename = one_up_path
+                    if zip_info.is_dir():
+                        # pour eviter message d'erreur dans
+                        # jupyter notebook
+                        time.sleep(0.01)
+                        continue
 
-                if not skip_extract:
-                    zip_file.extract(zip_info, path=dest_path)
+                    if extract_one_folder_up:
+                        zip_info.filename = one_up_path
 
-            progress.refresh()
+                    # zip_info.filename = os.path.join(h5_images.name, zip_info.filename)
+                    zip_info.filename = zip_info.filename.replace("\\", "/")
+                    zip_bytes = zip_file.read(zip_info)
+
+                    image_np = np.frombuffer(zip_bytes, dtype=np.uint8)
+                    image_np = cv2.imdecode(image_np, cv2.COLOR_BGR2RGB)
+
+                    h5_images.create_dataset(zip_info.filename,
+                                             data=image_np)
+
+                progress.refresh()
     except Exception as e:
         print(e)
         return False
     else:
         return True
 
-def _dataset_install(dataset_config, **kwargs):
+def _dataset_install(dataset_config,
+                     force_download=False,
+                     keep_download=False,
+                     force_extract=False,
+                     extract_one_folder_up=True,
+                     **kwargs):
     display_html(f"<b>Downloading</b> <i>{dataset_config.url}</i>")
-    skip_download = _get_default(kwargs, "skip_download", False)
-    zip_file = _download_with_progress(dataset_config.install_path,
+
+    dataset_path, _ = os.path.split(dataset_config.install_path)
+    os.makedirs(dataset_path, exist_ok=True)
+    zip_file = _download_with_progress(dataset_path,
                                        dataset_config.url,
-                                       skip_download=skip_download)
+                                       force_download)
     if zip_file is None:
         display_html(f"<b>Failed</b>")
         return False
 
-    display_html(f"<b>Unzipping</b> <i>{zip_file}</i>")
-    unzip_one_folder_up = _get_default(kwargs, "unzip_one_folder_up", True)
-    skip_extract = _get_default(kwargs, "skip_extract", False)
-    if not _unzip_with_progress(dataset_config.install_path,
-                                zip_file,
-                                unzip_one_folder_up=unzip_one_folder_up,
-                                skip_extract=skip_extract):
+    display_html(f"<b>Extracting</b> <i>{zip_file}</i>")
+    if not _h5extract_with_progress(dataset_config.install_path,
+                                    zip_file,
+                                    force_extract,
+                                    extract_one_folder_up):
         display_html("<b>Failed</b>")
         return False
 
     display_html("<b>Cleaning</b>")
-    os.remove(zip_file)
+
+    if not keep_download:
+        os.remove(zip_file)
 
     return True
-
-def _gather_files(dataset_config):
-    dataset_files = os.path.join(dataset_config.install_path, "*", "*.*")
-    thumbbail_path = os.path.join(dataset_config.install_path, ".thumbnails")
-    dataset_files = [os.path.normpath(f)
-                     for f in iglob(dataset_files)
-                        if not thumbbail_path in f]
-    return list(dataset_files), thumbbail_path
 
 def _preprocess_csv(dataset_config,
                     dataset_files,
@@ -173,28 +195,48 @@ def _preprocess_csv(dataset_config,
                            quoting=QUOTE_NONNUMERIC)
 
 def _preprocess_thumbnail(dataset_config,
-                          dataset_files,
-                          thumbbail_path):
-    progress = tqdm(iterable=dataset_files,
-                    total=len(dataset_files),
+                          h5_file,
+                          force_thumbnail_generation=False,
+                          **kwargs):
+    if _THUMBNAILS_KEY in h5_file:
+        if force_thumbnail_generation:
+            del h5_file[_THUMBNAILS_KEY]
+        else:
+            return
+
+    h5_thumbnails = h5_file.create_group(_THUMBNAILS_KEY)
+    images = h5_file[_IMAGES_KEY].items()
+    progress = tqdm(iterable=images,
+                    total=len(images),
                     bar_format="{l_bar}{bar}{postfix}")
 
-    for image_path in progress:
-        _, labels, file = image_path.split(os.sep)
 
-        progress.set_postfix_str( os.path.join(labels, file) )
 
-        image = cv2.imread(image_path)
-        h, w, _ = image.shape
-        th = math.ceil(h * dataset_config.thumbnail_scale)
-        tw = math.ceil(w * dataset_config.thumbnail_scale)
-        thumbnail = cv2.resize(image, (tw, th))
 
-        thumbnail_folder = os.path.join(thumbbail_path, labels)
-        thumbnail_file = os.path.join(thumbnail_folder, file)
-        os.makedirs(thumbnail_folder, exist_ok=True)
-        cv2.imwrite(thumbnail_file, thumbnail)
+    def visitor_func(name, node):
+        if isinstance(node, h5py.Dataset):
+            # node is a dataset
+        else:
+            # node is a group
 
+
+    for labels, image in progress:
+        print(labels)
+        print(image.name.split("/"))
+        print()
+        # print(list(image.keys()))
+
+        progress.set_postfix_str(image.name)
+
+        # image_np = image[...]
+        # h, w, _ = image_np.shape
+        # th = math.ceil(h * dataset_config.thumbnail_scale)
+        # tw = math.ceil(w * dataset_config.thumbnail_scale)
+        # thumbnail = cv2.resize(image_np, (tw, th))
+        # h5_thumbnails.create_dataset(labels,
+        #                              data=thumbnail)
+
+    h5_file.flush()
     progress.update()
 
 def dataset_load_config(filename):
@@ -229,11 +271,11 @@ def dataset_load(dataset_config, **kwargs):
         Object retourne par dataset_load_config()
 
     kwargs:
-        Voir _dataset_install
+        Voir _dataset_install et _preprocess_thumbnail
 
     Retour:
-        Pandas.DataFrame representant le
-        dataset ou None si probleme.
+        object encapsulant le dataset ou
+        None si probleme.
     """
     def dataset_read():
         df = read_csv(dataset_config.preprocess_path,
@@ -245,34 +287,31 @@ def dataset_load(dataset_config, **kwargs):
 
         return df
 
-    if os.path.exists(dataset_config.preprocess_path):
+    if not dataset_config.force_install and \
+       os.path.exists(dataset_config.install_path):
         return dataset_read()
 
-    if dataset_config.install and \
+    if dataset_config.force_install or \
        not os.path.exists(dataset_config.install_path):
-        os.makedirs(dataset_config.install_path)
-
         display_html(f"<b>Installing Dataset</b>")
-        if not _dataset_install(dataset_config, kwargs=kwargs):
-            display_html(f"<b>Dataset installation error</b>")
-        else:
+        if _dataset_install(dataset_config, **kwargs):
             display_html(f"<b>Dataset installed</b>")
+        else:
+            display_html(f"<b>Dataset installation error</b>")
     else:
         display_html(f"<b>Dataset already installed</b>")
 
-    dataset_files, thumbbail_path = _gather_files(dataset_config)
-
-    if not os.path.exists(thumbbail_path):
+    with h5py.File(dataset_config.install_path, "r+") as h5_file:
         display_html("<b>Dataset preprocessing thumbnails</b>")
         _preprocess_thumbnail(dataset_config,
-                                      dataset_files,
-                                      thumbbail_path)
-    else:
-        display_html("<b>Dataset thumbnails already preprocessed</b>")
+                              h5_file,
+                              **kwargs)
 
-    display_html("<b>Dataset preprocessing csv</b>")
-    _preprocess_csv(dataset_config,
-                            dataset_files,
-                            thumbbail_path)
+        # display_html("<b>Dataset preprocessing csv</b>")
+        # _preprocess_csv(dataset_config,
+        #                 dataset_files,
+        #                 thumbbail_path)
+
+        h5_file.flush()
 
     return dataset_read()
