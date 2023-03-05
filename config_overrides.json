@@ -1,9 +1,6 @@
 {
     "dataset": {
-        "force_install": true,
-        "keep_download": true,
-        "force_extract": true,
-        "force_thumbnail_generation": true,
-        "force_dataframe_generation": true
+        "force_install": false,
+        "keep_download": true
     }
 }
