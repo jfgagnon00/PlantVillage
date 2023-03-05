@@ -1,31 +1,30 @@
 import cv2
 import h5py
 import math
+import numpy as np
+import pandas as pd
 import os
 import re
 import requests
 import zipfile
 
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from jupyter_helpers import display_html
-from .MetaObject import MetaObject
-from numpy import frombuffer
+from ..Concurrent import parallel_for
+from ..Jupyter import display_html
+from ..MetaObject import MetaObject
 from tqdm.notebook import tqdm
 
-
-_IMAGES_KEY = "images"
-_IMAGE_COUNT_ATTR = "image_count"
 
 _THUMBNAILS_KEY = "thumbnails"
 _THUMBNAIL_COUNT_ATTR = "thumbnail_count"
 
 _DATAFRAME_KEY = "dataframe"
 _DATAFRAME_COLUMNS_COUNT_ATTR = "dataframe_columns_count"
+_DATAFRAME_SOURCE_ATTR = "dataframe_source"
 _DATAFRAME_COLUMNS = ["species",
                       "disease",
+                      "label",
                       "image_path",
-                      "thumbnail_path",
-                      "label"]
+                      "thumbnail_path"]
 _DATAFRAME_ENCODING = "utf-8"
 
 
@@ -51,18 +50,16 @@ def _download(config, dest_path):
     else:
         return filename
 
-def _initialize_h5(h5_file):
-    h5_images = h5_file.create_group(_IMAGES_KEY)
+def _initialize_h5(h5_file, zip_basename):
     h5_thumbnails = h5_file.create_group(_THUMBNAILS_KEY)
 
     h5_dataframe = h5_file.create_group(_DATAFRAME_KEY)
     h5_dataframe.attrs[_DATAFRAME_COLUMNS_COUNT_ATTR] = len(_DATAFRAME_COLUMNS)
+    h5_dataframe.attrs[_DATAFRAME_SOURCE_ATTR] = zip_basename.encode(_DATAFRAME_ENCODING)
 
     dataframe_data = {k: [] for k in _DATAFRAME_COLUMNS}
 
-    return MetaObject.from_dict(
-           {
-                "images": h5_images,
+    return MetaObject.from_dict({
                 "thumbnails": h5_thumbnails,
                 "dataframe": h5_dataframe,
                 "dataframe_data": dataframe_data
@@ -77,10 +74,8 @@ def _update_h5_dataframe(h5_meta):
 
 def _update_h5(h5_meta,
                name,
-               image,
                thumbnail,
                dataframe):
-    h5_meta.images.create_dataset(name, data=image)
     h5_meta.thumbnails.create_dataset(name, data=thumbnail)
 
     if not dataframe is None:
@@ -115,19 +110,16 @@ def _extract_dataframe(config, filename):
     return {
         "species": plant_species.encode(_DATAFRAME_ENCODING),
         "disease": plant_disease.encode(_DATAFRAME_ENCODING),
-        "image_path": "/".join([_IMAGES_KEY, filename]).encode(_DATAFRAME_ENCODING),
-        "thumbnail_path": "/".join([_THUMBNAILS_KEY, filename]).encode(_DATAFRAME_ENCODING),
-        "label": label.encode(_DATAFRAME_ENCODING)
+        "label": label.encode(_DATAFRAME_ENCODING),
+        "image_path": filename.encode(_DATAFRAME_ENCODING),
+        "thumbnail_path": "/".join([_THUMBNAILS_KEY, filename]).encode(_DATAFRAME_ENCODING)
     }
 
-def _extract(config, zip_file, zip_info):
+def _preprocess(config, zip_file, zip_info):
     if zip_info.is_dir():
         return None
 
     filename = zip_info.filename.replace("\\", "/")
-    if config.extract_one_folder_up:
-        filename = filename.split("/")[1:]
-        filename = "/".join(filename)
 
     # dataframe
     dataframe = _extract_dataframe(config, filename)
@@ -138,7 +130,7 @@ def _extract(config, zip_file, zip_info):
     bytes = zip_file.read(zip_info)
 
     # create image from data
-    image = frombuffer(bytes, dtype=np.uint8)
+    image = np.frombuffer(bytes, dtype=np.uint8)
     image = cv2.imdecode(image, cv2.IMREAD_COLOR)
 
     # scale down
@@ -148,37 +140,39 @@ def _extract(config, zip_file, zip_info):
     thumbnail = cv2.resize(image, (tw, th))
 
     return filename, \
-           image, \
            thumbnail, \
            dataframe
 
-def _extract_threaded(config, zip_filename):
+def _preprocess_threaded(config, zip_filename):
     with h5py.File(config.install_path, "w") as h5_file:
-        h5_meta = _initialize_h5(h5_file)
+        path, file = os.path.split(zip_filename)
+        zip_basename = path if file is None else file
+        h5_meta = _initialize_h5(h5_file, zip_basename)
 
         with zipfile.ZipFile(zip_filename) as zip_file:
             zip_infos = zip_file.infolist()
-            worker_count = os.cpu_count() // 2
+
             image_count = 0
 
-            with ThreadPoolExecutor(max_workers=worker_count) as thread_pool:
-                futures = [thread_pool.submit(_extract,
-                                            config,
-                                            zip_file,
-                                            zip_info) for zip_info in zip_infos]
+            def _preprocess_completed(results):
+                progress.update()
 
-                with tqdm(total=len(zip_infos)) as progress:
-                    for f in as_completed(futures):
-                        progress.update()
+                if not results is None:
+                    nonlocal image_count
 
-                        results = f.result()
-                        if not results is None:
-                            image_count += 1
-                            _update_h5(h5_meta, *results)
+                    image_count += 1
+                    _update_h5(h5_meta, *results)
+
+            with tqdm(total=len(zip_infos)) as progress:
+                parallel_for(zip_infos,
+                    _preprocess,
+                    config,
+                    zip_file,
+                    task_completed=_preprocess_completed,
+                    executor=config.executor)
 
         _update_h5_dataframe(h5_meta)
 
-        h5_meta.images.attrs[_IMAGE_COUNT_ATTR] = image_count
         h5_meta.thumbnails.attrs[_THUMBNAIL_COUNT_ATTR] = image_count
         h5_file.flush()
 
@@ -187,7 +181,7 @@ class PlantVillageConfig():
     Parametres configurant l'installation/preprocessing
     de PlantVillage
     """
-    def __init__(self):
+    def __init__(self, executor=None):
         self.url = "https://tinyurl.com/22tas3na"
         self.install_path = "dataset/PlantVillage.hd5"
         self.species_disease_re = "(.*)(?:___)(.*)"
@@ -196,8 +190,8 @@ class PlantVillageConfig():
         self.thumbnail_scale = 0.25
 
         self.force_download = False
-        self.keep_download = False
-        self.extract_one_folder_up = True
+        self.read_only = True
+        self.executor = executor
 
 def plant_village_load(config):
     """
@@ -212,14 +206,19 @@ def plant_village_load(config):
         None si probleme.
     """
     def instantiate():
-        h5_file = h5py.File(config.install_path, "r")
+        mode = "r" if config.read_only else "r+"
+        h5_file = h5py.File(config.install_path, mode)
         h5_dataframe = h5_file[_DATAFRAME_KEY]
 
-        attrs = {}
-        attrs["h5_file"] = h5_file
-        attrs["data"] = {c:h5_dataframe[c].asstr()[...] for c in _DATAFRAME_COLUMNS}
+        path, file = os.path.split(config.install_path)
+        if file is None:
+            zip_filename = h5_dataframe.attrs[_DATAFRAME_SOURCE_ATTR]
+        else:
+            zip_filename = os.path.join(path, h5_dataframe.attrs[_DATAFRAME_SOURCE_ATTR])
 
-        return MetaObject.from_dict(attrs)
+        return MetaObject.from_kwargs(h5_file=h5_file,
+                                      zip_file=zipfile.ZipFile(zip_filename),
+                                      dataframe=pd.DataFrame({c:h5_dataframe[c].asstr()[...] for c in _DATAFRAME_COLUMNS}))
 
     if not config.force_install and \
        os.path.exists(config.install_path):
@@ -238,11 +237,7 @@ def plant_village_load(config):
             display_html(f"<b>Failed</b>")
             return None
 
-    display_html(f"<b>Extracting</b> <i>{zip_file}</i>")
-    _extract_threaded(config, zip_file)
-
-    if not config.keep_download:
-        display_html("<b>Cleaning</b>")
-        os.remove(zip_file)
+    display_html(f"<b>Preprocesssing</b> <i>{zip_file}</i>")
+    _preprocess_threaded(config, zip_file)
 
     return instantiate()

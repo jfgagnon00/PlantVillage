@@ -1,6 +1,11 @@
 {
     "dataset": {
         "force_install": false,
-        "keep_download": true
+        "read_only": true
+    },
+    "orb_features": {
+        "force_generate": true,
+        "read_only": true,
+        "nfeatures": 500
     }
 }

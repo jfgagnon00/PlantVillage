@@ -14,6 +14,10 @@ class MetaObject(object):
         return MetaObject(attributes)
 
     @classmethod
+    def from_kwargs(cls, **kwargs):
+        return cls.from_dict(kwargs)
+
+    @classmethod
     def from_json(cls, filename):
         try:
             with open(filename) as f:
