@@ -1,11 +1,13 @@
 {
     "dataset": {
-        "force_install": false,
-        "read_only": true
+        "force_install": false
     },
     "orb_features": {
         "force_generate": false,
-        "read_only": true,
-        "nfeatures": 50
+        "nfeatures": 500
+    },
+    "sift_features": {
+        "force_generate": false,
+        "nfeatures": 500
     }
 }
