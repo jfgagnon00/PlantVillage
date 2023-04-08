@@ -4,8 +4,8 @@
         "read_only": true
     },
     "orb_features": {
-        "force_generate": true,
+        "force_generate": false,
         "read_only": true,
-        "nfeatures": 500
+        "nfeatures": 50
     }
 }
