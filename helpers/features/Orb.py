@@ -199,12 +199,7 @@ class OrbFeaturesIter():
         return self._zip_file
 
     def get_image(self, zip_info):
-        image = self._zip_file.read(zip_info)
-        image = np.frombuffer(image, dtype=np.uint8)
-        image = cv2.imdecode(image, cv2.IMREAD_COLOR)
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-
-        return image
+        return None
 
     def __iter__(self):
         return self
