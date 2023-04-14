@@ -1,0 +1,2 @@
+Segmentation techniques:
+    https://conforty.net/plantvillage/leafsegmentation.html
