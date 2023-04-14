@@ -1,0 +1,3 @@
+Bag Of Visual Words techniques:
+    https://www.pinecone.io/learn/bag-of-visual-words/
+    https://medium.com/analytics-vidhya/bag-of-visual-words-bag-of-features-9a2f7aec7866
