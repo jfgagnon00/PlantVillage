@@ -11,3 +11,6 @@ def _get_image_zip_info(zip_file, zip_info):
 
 def _get_image_filename(zip_file, filename):
     return _get_image_zip_info(zip_file, zip_file.getinfo(filename))
+
+def _get_thumbnail_filename(h5_file, filename):
+    return h5_file[filename][...]

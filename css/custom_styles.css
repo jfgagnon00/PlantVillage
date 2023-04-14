@@ -1,0 +1,25 @@
+/* identifier les reponse aux questions */
+.answer {
+    color:blue;
+}
+
+/* utilitaire pour faire des colonnes */
+.columns_2 {
+    float:left;
+    width:calc(100% / 2);
+}
+
+.columns_3 {
+    float:left;
+    width:calc(100% / 3);
+}
+
+.columns_4 {
+    float:left;
+    width:calc(100% / 4);
+}
+
+.columns_5 {
+    float:left;
+    width:calc(100% / 5);
+}

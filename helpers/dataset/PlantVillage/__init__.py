@@ -7,7 +7,8 @@ from zipfile import ZipFile
 from tqdm.notebook import tqdm
 
 from .Config import Config
-from .image_readers import _get_image_filename
+from .image_readers import _get_image_filename, \
+                           _get_thumbnail_filename
 from .preprocess import _preprocess_parallel, \
                         _DATAFRAME_KEY, \
                         _DATAFRAME_SOURCE_ATTR, \
@@ -33,7 +34,9 @@ def _instantiate(config):
     return MetaObject.from_kwargs(h5_file=h5_file,
                                   dataframe=dataframe,
                                   get_image=lambda index: _get_image_filename(zip_file, \
-                                                                              dataframe.loc[index, "image_path"]))
+                                                                              dataframe.loc[index, "image_path"]),
+                                  get_thumbnail=lambda index: _get_thumbnail_filename(h5_file, \
+                                                                                      dataframe.loc[index, "thumbnail_path"]))
 
 def _download(config, dest_path):
     try:

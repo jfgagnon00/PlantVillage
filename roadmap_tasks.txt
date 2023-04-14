@@ -1,22 +1,22 @@
 Taches pour ce samedi
     Fred + Michele
-    * se documenter sur BOVW
-    * regarder un peu le code
-    *
+        * se documenter sur BOVW
+        * regarder un peu le code
 
     JFG
-    * Mettre le git repro au propre
-    * ajouter les references des papiers sur git hub
-    * Valider avec Soumaya si le projet est ok
+        * Mettre le git repro au propre
 
 
 Objectifs:
-* Extraction features des images (en partie fait)
-* Contruire le dictionnaire (kmeans)
-* Contruire pour chaque image un histogramme en fonction du dictionnaire -> saver dans fichier hd5?
-* Entrainer KNN et Random Forest
-* Evaluer
-* Rapport + presentation
+    * Extraction features des images (en partie fait)
+    * Contruire le dictionnaire (codebook) (kmeans)
+    * Contruire pour chaque image un histogramme en fonction du dictionnaire -> saver dans fichier hd5?
+    * Entrainer KNN et Random Forest
+    * Sauvegarde des modeles
+    * Wrapper dans "application" (widgets notebook?)
+    * Evaluer
+    * Rapport + presentation
 
 Stretch goal:
-* Segmentation background/forground pour feature extraction
+    * Segmentation background/foreground pour feature extraction
+    * 
