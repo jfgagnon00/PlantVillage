@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 
 class FeaturesConfig(ABC):
     def __init__(self, executor, chunk_size):
-        self.install_path = None
+        self.install_path = ""
         self.force_generate = False
         self.read_only = True
         self.executor = executor

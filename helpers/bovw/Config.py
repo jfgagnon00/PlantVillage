@@ -1,8 +1,8 @@
 class Config():
     """
     Parametres configurant l'installation/preprocessing
-    du dictionnaire
+    du dictionnaire (Bag of Visual Words)
     """
-    def __init__(self, executor=None):
-        self.install_path = "dataset/BoVW.hd5"
+    def __init__(self):
+        self.install_path = ""
         self.read_only = True
