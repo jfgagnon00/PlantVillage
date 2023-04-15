@@ -16,3 +16,6 @@ class Profile():
     @property
     def duration(self):
         return self._exit - self._enter
+
+    def round_duration(self, digits=2):
+        return round(self.duration, digits)

@@ -6,3 +6,4 @@ class Config():
     def __init__(self):
         self.install_path = ""
         self.read_only = True
+        self.n_clusters = 200
