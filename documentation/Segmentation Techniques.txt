@@ -1,3 +1,4 @@
 Segmentation techniques:
     https://conforty.net/plantvillage/leafsegmentation.html
     https://scikit-image.org/docs/stable/api/skimage.feature.html#skimage.feature.graycoprops (homogeneity pour spotter les zones d'interet)
+    https://scikit-image.org/docs/stable/auto_examples/filters/plot_entropy.html (comme on a vu dans A52 mais sur une image)
