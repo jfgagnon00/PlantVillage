@@ -6,12 +6,12 @@ from . import FeaturesConfig
 class SiftFeaturesConfig(FeaturesConfig):
     """
     Parametres configurant extraction des features
-    avec OpenCV ORB
+    avec OpenCV SIFT
     """
     def __init__(self, executor=None, chunk_size=150):
-        super(FeaturesConfig, self).__init__(executor, chunk_size)
+        super().__init__(executor, chunk_size)
 
-        self.install_path = "dataset/OrbFeatures.hd5"
+        self.install_path = "dataset/SiftFeatures.hd5"
         self.nfeatures = 500
 
     def features_width(self):

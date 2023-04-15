@@ -6,6 +6,7 @@ from pandas import DataFrame
 from zipfile import ZipFile
 from tqdm.notebook import tqdm
 
+from .attribute_manipulation import attribute_prettify
 from .Config import Config
 from .image_readers import _get_image_filename, \
                            _get_thumbnail_filename
