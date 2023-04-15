@@ -1,8 +1,8 @@
 class Config():
     """
     Parametres configurant l'installation/preprocessing
-    du code book
+    du dictionnaire
     """
     def __init__(self, executor=None):
-        self.install_path = "dataset/CodeBook.hd5"
+        self.install_path = "dataset/BoVW.hd5"
         self.read_only = True
