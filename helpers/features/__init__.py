@@ -10,8 +10,8 @@ from .extraction import _batch_extract_parallel, \
 from .key_points import _list_to_cv_key_points
 from .DatasetIter import DatasetIter
 from .FeaturesConfig import FeaturesConfig
-from .Orb import OrbFeaturesConfig
-from .Sift import SiftFeaturesConfig
+from .OrbFeaturesConfig import OrbFeaturesConfig
+from .SiftFeaturesConfig import SiftFeaturesConfig
 
 from ..MetaObject import MetaObject
 
