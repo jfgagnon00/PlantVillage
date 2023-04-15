@@ -1,2 +1,3 @@
 Segmentation techniques:
     https://conforty.net/plantvillage/leafsegmentation.html
+    https://scikit-image.org/docs/stable/api/skimage.feature.html#skimage.feature.graycoprops (homogeneity pour spotter les zones d'interet)
