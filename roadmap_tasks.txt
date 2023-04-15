@@ -4,12 +4,11 @@ Taches pour ce samedi
         * regarder un peu le code
 
     JFG
-        * Mettre le git repro au propre
-
+        *
 
 Objectifs:
     * Extraction features des images (en partie fait)
-    * Contruire le dictionnaire (codebook) (kmeans)
+    * Contruire le dictionnaire (codebook avec clustering)
     * Contruire pour chaque image un histogramme en fonction du dictionnaire -> saver dans fichier hd5?
     * Entrainer KNN et Random Forest
     * Sauvegarde des modeles
@@ -19,4 +18,3 @@ Objectifs:
 
 Stretch goal:
     * Segmentation background/foreground pour feature extraction
-    * 
