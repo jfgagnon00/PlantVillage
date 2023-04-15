@@ -8,6 +8,7 @@ def array_to_str(a):
 FINAL_REPORT = "final_report.ipynb"
 
 notebooks_to_merge = [
+    "00 - TOC.ipynb",
     "01 - Exploration.ipynb",
     "02 - Features Extraction.ipynb",
     "03 - Train Test Split.ipynb",
