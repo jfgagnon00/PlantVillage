@@ -1,3 +1,7 @@
+# a ignorer glboalement
 __pycache__/
 .ipynb_checkpoints/
+
+# a ignorer dans le repertoire courant
 /dataset
+final_report.ipynb
