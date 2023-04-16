@@ -1,5 +1,3 @@
-from . import Config
-
 from os  import cpu_count
 from sklearn.cluster import MiniBatchKMeans
 

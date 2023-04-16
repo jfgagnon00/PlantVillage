@@ -1,4 +1,4 @@
-class Config():
+class BoVWConfig():
     """
     Parametres configurant l'installation/preprocessing
     du dictionnaire (Bag of Visual Words)

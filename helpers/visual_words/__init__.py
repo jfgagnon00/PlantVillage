@@ -1,24 +1,25 @@
 import os
 import pickle
 
-from .Config import Config
+from .BoVWConfig import BoVWConfig
 from .preprocess import _preprocess
+from .VisualWords import VisualWords
 from ..MetaObject import MetaObject
 
 
-def _instantiate(config):
+def _instantiate_bag(config):
     with open(config.install_path, "rb") as pickled_file:
         model = pickle.load(pickled_file)
 
     # TODO: ajouter des attribut wrapper?
     return MetaObject.from_kwargs(model=model)
 
-def load(config, features):
+def load_bovw(config, features):
     """
     Utilitaire encapsulant extraction/loading du dictionnaire.
 
     config:
-        Instance de Config
+        Instance de BoVWConfig
 
     features:
         data servant a construire le dictionnaire
@@ -28,7 +29,7 @@ def load(config, features):
         il est retourne sinon il est construit a partir de features.
     """
     if not config.force_generate and os.path.exists(config.install_path):
-        return _instantiate(config)
+        return _instantiate_bag(config)
 
     if config.force_generate or not os.path.exists(config.install_path):
         path, file  = os.path.split(config.install_path)
@@ -40,4 +41,4 @@ def load(config, features):
     with open(config.install_path, "wb") as pickled_file:
         pickle.dump(model, pickled_file)
 
-    return _instantiate(config)
+    return _instantiate_bag(config)
