@@ -8,7 +8,7 @@ Taches pour ce samedi
 
 Objectifs:
     * Extraction features des images (en partie fait)
-    * Contruire le dictionnaire (codebook avec clustering)
+    * Contruire le dictionnaire (recherche sur perf debutee, reste a determiner interface avec les autres modules)
     * Contruire pour chaque image un histogramme en fonction du dictionnaire -> saver dans fichier hd5?
     * Entrainer KNN et Random Forest
     * Sauvegarde des modeles
@@ -18,6 +18,4 @@ Objectifs:
 
 Stretch goal:
     * Segmentation background/foreground pour feature extraction
-
-
-test
+    * Size optimal pour dictionnaire (trouver algo et resampler)

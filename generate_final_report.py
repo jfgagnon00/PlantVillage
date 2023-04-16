@@ -13,7 +13,7 @@ notebooks_to_merge = [
     "02 - Features Extraction.ipynb",
     "03 - Train Test Split.ipynb",
     "04 - Codebook.ipynb",
-    "05 - Image To Codebook.ipynb",
+    "05 - Image To Visual Words.ipynb",
     "06 - Training.ipynb",
     ]
 
