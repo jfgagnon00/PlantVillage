@@ -20,6 +20,13 @@ _KEYPOINTS_WIDTH = 7
 _KEYPOINTS_DTYPE = np.float32
 
 
+def _extract(desc_factory, image):
+    kpts, descs = desc_factory.detectAndCompute(image, None)
+    if descs is None:
+        return None, None
+    else:
+        return _cv_key_points_to_list(kpts), descs
+
 def _batch_extract(config,
                    h5_file,
                    batch_iterables):
@@ -34,7 +41,7 @@ def _batch_extract(config,
         count += 1
 
         image = image_future()
-        kpts, descs = desc_factory.detectAndCompute(image, None)
+        kpts, descs = _extract(desc_factory, image)
         if descs is None:
             continue
 
@@ -43,7 +50,7 @@ def _batch_extract(config,
                             axis=0)
 
         key_points = np.append(key_points,
-                               _cv_key_points_to_list(kpts),
+                               kpts,
                                axis=0)
 
         indices = np.append(indices,

@@ -2,6 +2,10 @@ from abc import ABC, abstractmethod
 
 
 class FeaturesConfig(ABC):
+    """
+    Classe abstraite encapsulant les configurations pour
+    extraction des features.
+    """
     def __init__(self, executor, chunk_size):
         self.install_path = ""
         self.force_generate = False

@@ -9,6 +9,7 @@ from .extraction import _batch_extract_parallel, \
                         _KEYPOINTS_KEY
 from .key_points import _list_to_cv_key_points
 from .DatasetIter import DatasetIter
+from .ExtractionAdapter import ExtractionAdapter
 from .FeaturesConfig import FeaturesConfig
 from .OrbFeaturesConfig import OrbFeaturesConfig
 from .SiftFeaturesConfig import SiftFeaturesConfig
