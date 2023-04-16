@@ -1,30 +1,31 @@
-import h5py
 import os
+import pickle
 
 from .Config import Config
+from .preprocess import _preprocess
 from ..MetaObject import MetaObject
 
 
 def _instantiate(config):
-    mode = "r" if config.read_only else "r+"
+    with open(config.install_path, "rb") as pickled_file:
+        model = pickle.load(pickled_file)
 
-    h5_file = h5py.File(config.install_path, mode)
+    # TODO: ajouter des attribut wrapper?
+    return MetaObject.from_kwargs(model=model)
 
-    return MetaObject.from_kwargs(h5_file=h5_file)
-
-def load(config, features_iter):
+def load(config, features):
     """
     Utilitaire encapsulant extraction/loading du dictionnaire.
 
     config:
         Instance de Config
 
-    features_iter:
-        iterateur sur numpy array
+    features:
+        data servant a construire le dictionnaire
 
     Retour:
         MetaObject encapsulant le dictionnaire. Si le fichier demande existe,
-        il est retourne sinon il est construit a partir de features_iter.
+        il est retourne sinon il est construit a partir de features.
     """
     if not config.force_generate and os.path.exists(config.install_path):
         return _instantiate(config)
@@ -34,8 +35,9 @@ def load(config, features_iter):
         if not file is None:
             os.makedirs(path, exist_ok=True)
 
-    print("Constrution Bag of Visual Words")
-    with h5py.File(config.install_path, "w") as h5_file:
-        pass
+    print("Construction Bag of Visual Words")
+    model = _preprocess(config, features)
+    with open(config.install_path, "wb") as pickled_file:
+        pickle.dump(model, pickled_file)
 
     return _instantiate(config)

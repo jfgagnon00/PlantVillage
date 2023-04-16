@@ -13,9 +13,15 @@ Objectifs:
     * Entrainer KNN et Random Forest
     * Sauvegarde des modeles
     * Wrapper dans "application" (widgets notebook?)
+    * Optimization des hyperparametres (les valeurs qui sont dans config_overrides.json)
+        * choix du type de features (ORB ou SIFT)
+        * determiner nombre de features optimales
+        * Ajouter un label 'Ca marche pas -  inclassifiable'
     * Evaluer
     * Rapport + presentation
 
 Stretch goal:
     * Segmentation background/foreground pour feature extraction
-    * Size optimal pour dictionnaire (trouver algo et resampler)
+    * Size optimal pour dictionnaire (trouver algo et resampler features)
+    * TF-IDF pour l'histogramme
+    * Passer SIFT Features en half float si besoin

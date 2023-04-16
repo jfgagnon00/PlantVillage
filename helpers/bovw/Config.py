@@ -5,5 +5,5 @@ class Config():
     """
     def __init__(self):
         self.install_path = ""
-        self.read_only = True
+        self.force_generate = False
         self.n_clusters = 200

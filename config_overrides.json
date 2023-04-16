@@ -11,8 +11,9 @@
             "nfeatures": 500
         },
         "bovw": {
-            "install_path": "dataset/OrbBoVW.hd5",
-            "force_generate": false
+            "install_path": "dataset/OrbBoVW.pkl",
+            "force_generate": false,
+            "n_clusters": 500
         }
     },
     "sift": {
@@ -22,8 +23,9 @@
             "nfeatures": 500
         },
         "bovw": {
-            "install_path": "dataset/SiftBoVW.hd5",
-            "force_generate": false
+            "install_path": "dataset/SiftBoVW.pkl",
+            "force_generate": false,
+            "n_clusters": 500
         }
     }
 }
