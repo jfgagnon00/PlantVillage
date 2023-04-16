@@ -19,6 +19,7 @@ Objectifs:
         - investiguer d'autres choix de features?
 
     * Contruire pour chaque image un histogramme en fonction du dictionnaire
+        - traitement par image est fait en partie, il faudrait ajouter le traitement en lot
         - saver dans fichier hd5 resultats intermediaires ou juste faire les calculs a la demande?
 
     * Entrainer KNN et Random Forest
