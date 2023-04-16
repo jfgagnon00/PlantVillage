@@ -1,4 +1,5 @@
 import cv2
+import numpy as np
 
 from ..features.extraction import _extract as _features_extract
 from ..features.key_points import _list_to_cv_key_points
@@ -24,6 +25,7 @@ class VisualWords():
     def __init__(self, features_config, bovw_model):
         self._desc_factory = features_config.create_factory()
         self._bovw_model = bovw_model
+        self._n_clusters = bovw_model.cluster_centers_.shape[0]
 
     def extract(self, image):
         """
@@ -41,7 +43,10 @@ class VisualWords():
         if features is None:
             return None, None, None
 
-        return key_points, features, None
+        visual_words_freq = self._bovw_model.predict(features)
+        visual_words_freq = np.bincount(visual_words_freq, minlength=self._n_clusters)
+
+        return key_points, features, visual_words_freq
 
     def draw_key_points(self, image, key_points):
         """
