@@ -1,13 +1,31 @@
 {
     "dataset": {
+        "url": "https://tinyurl.com/22tas3na",
+        "install_path": "dataset/PlantVillage.hd5",
         "force_install": false
     },
-    "orb_features": {
-        "force_generate": false,
-        "nfeatures": 500
+    "orb": {
+        "features": {
+            "install_path": "dataset/OrbFeatures.hd5",
+            "force_generate": false,
+            "nfeatures": 500
+        },
+        "bovw": {
+            "install_path": "dataset/OrbBoVW.pkl",
+            "force_generate": false,
+            "n_clusters": 500
+        }
     },
-    "sift_features": {
-        "force_generate": false,
-        "nfeatures": 500
+    "sift": {
+        "features": {
+            "install_path": "dataset/SiftFeatures.hd5",
+            "force_generate": false,
+            "nfeatures": 500
+        },
+        "bovw": {
+            "install_path": "dataset/SiftBoVW.pkl",
+            "force_generate": false,
+            "n_clusters": 500
+        }
     }
 }

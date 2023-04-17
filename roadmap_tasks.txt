@@ -7,17 +7,38 @@ Taches pour ce samedi
         *
 
 Objectifs:
-    * Extraction features des images (en partie fait)
-    * Contruire le dictionnaire (codebook avec clustering)
-    * Contruire pour chaque image un histogramme en fonction du dictionnaire -> saver dans fichier hd5?
+    * Extraction features des images
+        - squelette est presentation
+
+    * Construire le dictionnaire
+        - recherche sur perf debutee
+        - interface avec les autres modules passe par config_overrides.json (tout est manuel)
+        - les bovw sont serialise en avec pickle
+        - il faudrait starter analyse pour resampler et analyser les correlations entre features
+        - investiguer visualisation pour aider a comprendre les correlations (t-sne)?
+        - investiguer d'autres choix de features?
+
+    * Contruire pour chaque image un histogramme en fonction du dictionnaire
+        - traitement par image est fait en partie, il faudrait ajouter le traitement en lot
+        - saver dans fichier hd5 resultats intermediaires ou juste faire les calculs a la demande?
+
     * Entrainer KNN et Random Forest
-    * Sauvegarde des modeles
+
+    * Sauvegarder des modeles
+
     * Wrapper dans "application" (widgets notebook?)
+
+    * Optimization des hyperparametres (les valeurs qui sont dans config_overrides.json)
+        * choix du type de features (ORB ou SIFT)
+        * determiner nombre de features optimales
+        * Ajouter un label 'Ca marche pas -  inclassifiable'
+
     * Evaluer
+
     * Rapport + presentation
 
 Stretch goal:
     * Segmentation background/foreground pour feature extraction
-
-
-test
+    * Size optimal pour dictionnaire (trouver algo et resampler features)
+    * TF-IDF pour l'histogramme
+    * Passer SIFT Features en half float si besoin

@@ -11,7 +11,6 @@ class OrbFeaturesConfig(FeaturesConfig):
     def __init__(self, executor=None, chunk_size=150):
         super().__init__(executor, chunk_size)
 
-        self.install_path = "dataset/OrbFeatures.hd5"
         self.nfeatures = 500
 
     def features_width(self):
