@@ -14,6 +14,10 @@
             "install_path": "dataset/OrbBoVW.pkl",
             "force_generate": false,
             "n_clusters": 500
+        },
+        "dataset_vw": {
+            "install_path": "dataset/Orb_VW.hd5",
+            "force_generate": false
         }
     },
     "sift": {
@@ -26,6 +30,10 @@
             "install_path": "dataset/SiftBoVW.pkl",
             "force_generate": false,
             "n_clusters": 500
+        },
+        "dataset_vw": {
+            "install_path": "dataset/Sift_VW.hd5",
+            "force_generate": false
         }
     },
 	"split": {
