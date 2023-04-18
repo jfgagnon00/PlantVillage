@@ -27,5 +27,10 @@
             "force_generate": false,
             "n_clusters": 500
         }
-    }
+    },
+	"split": {
+		"train_install_path": "dataset/train.txt",
+		"test_install_path": "dataset/test.txt"
+	}
+	
 }
