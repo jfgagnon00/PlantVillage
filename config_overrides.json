@@ -33,12 +33,13 @@
         },
         "dataset_vw": {
             "install_path": "dataset/SiftVW.hd5",
-            "force_generate": false
+            "force_generate": false,
+            "chunk_size": 25
         }
     },
-	"split": {
-		"train_install_path": "dataset/train.txt",
-		"test_install_path": "dataset/test.txt"
-	}
-	
+    "split": {
+        "train_install_path": "dataset/train.txt",
+        "test_install_path": "dataset/test.txt"
+    }
+
 }
