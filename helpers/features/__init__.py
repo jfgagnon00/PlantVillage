@@ -5,7 +5,7 @@ import os
 
 from .extraction import _batch_extract_parallel, \
                         _FEATURES_KEY, \
-                        _INDICES_KEY, \
+                        _INDICES_PREFIX, \
                         _KEYPOINTS_KEY
 from .key_points import _list_to_cv_key_points
 from .DatasetIter import DatasetIter
@@ -22,12 +22,14 @@ def _instantiate(config):
     h5_file = h5py.File(config.install_path, mode)
     h5_features = h5_file[_FEATURES_KEY]
     h5_key_points = h5_file[_KEYPOINTS_KEY]
-    h5_indices = h5_file[_INDICES_KEY]
+    h5_index_features = h5_file[f"{_INDICES_PREFIX}/{_FEATURES_KEY}"]
+    h5_index_key_points = h5_file[f"{_INDICES_PREFIX}/{_KEYPOINTS_KEY}"]
 
     return MetaObject.from_kwargs(h5_file=h5_file,
                                     features=h5_features,
                                     key_points=h5_key_points,
-                                    indices=h5_indices)
+                                    index_to_features=h5_index_features,
+                                    index_to_key_points=h5_index_key_points)
 
 def load(config, dataset_iter):
     """
@@ -73,12 +75,9 @@ def key_points_iter(features, dataset_iter):
     Retour:
         Voir ci-bas
     """
-    indices = features.indices[...]
-
     for index, image_path, image_future in dataset_iter:
         image = image_future()
-        where = np.where(indices == index)
-        key_points = features.key_points[where][...]
+        key_points = features.index_to_key_points[str(index)][...]
         key_points = _list_to_cv_key_points(key_points)
 
         yield index, \

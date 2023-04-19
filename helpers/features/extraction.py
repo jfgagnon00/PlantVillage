@@ -12,12 +12,12 @@ from ..MetaObject import MetaObject
 
 
 _FEATURES_KEY = "features"
-_INDICES_KEY = "indices"
-_INDICES_DTYPE = np.uint16
 
 _KEYPOINTS_KEY = "keypoints"
 _KEYPOINTS_WIDTH = 7
 _KEYPOINTS_DTYPE = np.float32
+
+_INDICES_PREFIX = "indices"
 
 
 def _extract(desc_factory, image):
@@ -32,10 +32,11 @@ def _batch_extract(config,
                    batch_iterables):
     features = np.empty((0, config.features_width()), dtype=config.features_dtype())
     key_points = np.empty((0, _KEYPOINTS_WIDTH), dtype=_KEYPOINTS_DTYPE)
-    indices = np.empty((0,), dtype=_INDICES_DTYPE)
+    indices = []
 
     desc_factory = config.create_factory()
 
+    batch_start = 0
     count = 0
     for index, _, image_future in batch_iterables:
         count += 1
@@ -45,6 +46,7 @@ def _batch_extract(config,
         if descs is None:
             continue
 
+        batch_stop = batch_start + descs.shape[0]
         features = np.append(features,
                             descs,
                             axis=0)
@@ -53,28 +55,33 @@ def _batch_extract(config,
                                kpts,
                                axis=0)
 
-        indices = np.append(indices,
-                            [index] * descs.shape[0],
-                            axis=0)
+        indices.append( (index, batch_start, batch_stop) )
+        batch_start = batch_stop
 
     if features.shape[0] > 0:
         batch_name = str(uuid.uuid4())
-        h5_file.create_dataset(batch_name,
-                               data=features)
+        features_ds = h5_file.create_dataset(batch_name,
+                                             data=features)
 
         batch_key_points = batch_name + "-key_points"
-        h5_file.create_dataset(batch_key_points,
-                               data=key_points)
+        key_points_ds = h5_file.create_dataset(batch_key_points,
+                                               data=key_points)
 
-        batch_indices = batch_name + "-index"
-        h5_file.create_dataset(batch_indices,
-                               data=indices)
+        # map each index for later fast query
+        for index, batch_start, batch_stop in indices:
+            features_layout = h5py.VirtualLayout((batch_stop - batch_start, config.features_width()), dtype=config.features_dtype())
+            key_points_layout = h5py.VirtualLayout((batch_stop - batch_start, _KEYPOINTS_WIDTH), dtype=_KEYPOINTS_DTYPE)
+
+            features_layout[...] = h5py.VirtualSource(features_ds)[batch_start:batch_stop, ...]
+            key_points_layout[...] = h5py.VirtualSource(key_points_ds)[batch_start:batch_stop, ...]
+
+            h5_file.create_virtual_dataset(f"{_INDICES_PREFIX}/{_FEATURES_KEY}/{index}", features_layout)
+            h5_file.create_virtual_dataset(f"{_INDICES_PREFIX}/{_KEYPOINTS_KEY}/{index}", key_points_layout)
 
         batch = MetaObject.from_kwargs(
                 features_count=features.shape[0],
                 features_ds_name=batch_name,
-                key_points_ds_name=batch_key_points,
-                indices_ds_name=batch_indices)
+                key_points_ds_name=batch_key_points)
     else:
         batch = None
 
@@ -89,7 +96,6 @@ def _batch_done(batch_results, progress, batch_accum):
         batch_accum.features_count += batch.features_count
         batch_accum.features_ds_names.append(batch.features_ds_name)
         batch_accum.key_points_ds_names.append(batch.key_points_ds_name)
-        batch_accum.indices_ds_names.append(batch.indices_ds_name)
 
 def _batch_merge(config, h5_file, batch_accum):
     features_layout = h5py.VirtualLayout((batch_accum.features_count, config.features_width()),
@@ -98,37 +104,28 @@ def _batch_merge(config, h5_file, batch_accum):
     key_points_layout = h5py.VirtualLayout((batch_accum.features_count, _KEYPOINTS_WIDTH),
                                            dtype=_KEYPOINTS_DTYPE)
 
-    indices_layout = h5py.VirtualLayout((batch_accum.features_count,),
-                                        dtype=_INDICES_DTYPE)
-
     start = 0
     for feature_name, \
-        key_point_name, \
-        indices_name in zip(batch_accum.features_ds_names,
-                            batch_accum.key_points_ds_names,
-                            batch_accum.indices_ds_names):
+        key_point_name in zip(batch_accum.features_ds_names,
+                              batch_accum.key_points_ds_names):
         features = h5_file[feature_name]
         key_points = h5_file[key_point_name]
-        indices = h5_file[indices_name]
 
         stop = start + features.shape[0]
 
         features_layout[start:stop, ...] = h5py.VirtualSource(features)
         key_points_layout[start:stop, ...] = h5py.VirtualSource(key_points)
-        indices_layout[start:stop] = h5py.VirtualSource(indices)
 
         start = stop
 
     h5_file.create_virtual_dataset(_FEATURES_KEY, features_layout)
     h5_file.create_virtual_dataset(_KEYPOINTS_KEY, key_points_layout)
-    h5_file.create_virtual_dataset(_INDICES_KEY, indices_layout)
 
 def _batch_extract_parallel(config, h5_file, dataset_iter):
     batch_accum = MetaObject.from_kwargs(
         features_count=0,
         features_ds_names=[],
-        key_points_ds_names=[],
-        indices_ds_names=[])
+        key_points_ds_names=[])
 
     with tqdm(total=dataset_iter.count) as progress:
         parallel_for(dataset_iter,

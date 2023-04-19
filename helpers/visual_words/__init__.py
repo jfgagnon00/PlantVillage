@@ -62,7 +62,7 @@ def load_dataset_vw(config, features, bovw_model, dataset_iter):
         Instance de DatasetVWConfig
 
     features:
-        features servant a construire le les visual words
+        MetaObject features servant a construire les visual words
 
     bovw_model:
         model representant le dictionnaire
