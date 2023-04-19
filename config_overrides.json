@@ -16,7 +16,7 @@
             "n_clusters": 500
         },
         "dataset_vw": {
-            "install_path": "dataset/Orb_VW.hd5",
+            "install_path": "dataset/OrbVW.hd5",
             "force_generate": false
         }
     },
@@ -32,7 +32,7 @@
             "n_clusters": 500
         },
         "dataset_vw": {
-            "install_path": "dataset/Sift_VW.hd5",
+            "install_path": "dataset/SiftVW.hd5",
             "force_generate": false
         }
     },

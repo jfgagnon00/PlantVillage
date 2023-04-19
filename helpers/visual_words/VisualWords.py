@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 
+from .preprocess import _extract as _vw_extract
 from ..features.extraction import _extract as _features_extract
 from ..features.key_points import _list_to_cv_key_points
 
@@ -39,14 +40,13 @@ class VisualWords():
             tuple (key_points, features, visual_words). Il est possible que le tuple
             soit (None, None, None)
         """
-        key_points, features = _features_extract(self._desc_factory, image)
-        if features is None:
+        key_points, features_array = _features_extract(self._desc_factory, image)
+        if features_array is None:
             return None, None, None
 
-        visual_words_freq = self._bovw_model.predict(features)
-        visual_words_freq = np.bincount(visual_words_freq, minlength=self._n_clusters)
+        visual_words_freq = _vw_extract(self._bovw_model, self._n_clusters, features_array)
 
-        return key_points, features, visual_words_freq
+        return key_points, features_array, visual_words_freq
 
     def draw_key_points(self, image, key_points):
         """

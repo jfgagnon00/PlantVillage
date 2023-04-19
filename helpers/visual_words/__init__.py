@@ -20,9 +20,12 @@ def _instantiate_dataset(config):
     mode = "r" if config.read_only else "r+"
 
     h5_file = h5py.File(config.install_path, mode)
+    h5_vw_freqs = h5_file["vw"]
+    h5_index_to_vw_freqs = h5_file["indices/vw"]
 
-    return MetaObject.from_kwargs(h5_file=h5_file)
-
+    return MetaObject.from_kwargs(h5_file=h5_file,
+                                  h5_vw_freqs=h5_vw_freqs,
+                                  h5_index_to_vw_freqs=h5_index_to_vw_freqs)
 
 def load_bovw(config, features):
     """
