@@ -1,10 +1,27 @@
 Taches pour ce samedi
-    Fred + Michele
-        * se documenter sur BOVW
-        * regarder un peu le code
+    Fred:
+        * continue Segmentation
+        * optimization size dictionaire
 
-    JFG
-        *
+    Michele:
+        * regarder comment comment on peut enlever de features a SIFT (reduire le 128)
+            1 image == M x 128 (m descriptors, chaque desc a 128 floats)
+                - mesure dependance entre quantitatif continue et label?
+                    - https://scikit-learn.org/stable/modules/generated/sklearn.feature_selection.SelectKBest.html#sklearn.feature_selection.SelectKBest
+                    - https://scikit-learn.org/stable/modules/generated/sklearn.feature_selection.f_classif.html
+
+                - https://scikit-learn.org/stable/modules/generated/sklearn.feature_selection.SelectFromModel.html
+                    DecisionTreeClassifier()
+                    RandomForest()
+
+                - https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html
+
+    JFG:
+        * regarder pourquoi OpenCV SIFT marche pas pour Frederic
+        * revoir les ensembles, les equilibrer et donner cette info dans le pipeline
+          (on garde grape pour le moment)
+        * assurer que le choix du data est propager dans le pipeline (config_overrides.json)
+        * finir le notebook training
 
 Objectifs:
     * Extraction features des images
