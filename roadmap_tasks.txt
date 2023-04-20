@@ -17,7 +17,6 @@ Taches pour ce samedi
                 - https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html
 
     JFG:
-        * regarder pourquoi OpenCV SIFT marche pas pour Frederic
         * revoir les ensembles, les equilibrer et donner cette info dans le pipeline
           (on garde grape pour le moment)
         * assurer que le choix du data est propager dans le pipeline (config_overrides.json)
