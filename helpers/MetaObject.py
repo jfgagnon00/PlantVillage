@@ -28,6 +28,10 @@ class MetaObject(object):
             return None
 
     @classmethod
+    def override_from_kwargs(cls, instance, **kwargs):
+        cls.override_from_dict(instance, kwargs)
+
+    @classmethod
     def override_from_dict(cls, instance, attributes):
         if isinstance(attributes, dict):
             instance.__dict__.update(attributes)

@@ -3,10 +3,14 @@ import h5py
 import numpy as np
 import os
 
+
 from .extraction import _batch_extract_parallel, \
+                        _update_train_test, \
                         _FEATURES_KEY, \
                         _INDICES_PREFIX, \
-                        _KEYPOINTS_KEY
+                        _KEYPOINTS_KEY, \
+                        _TRAIN_FEATURES_KEY, \
+                        _TEST_FEATURES_KEY
 from .key_points import _list_to_cv_key_points
 from .DatasetIter import DatasetIter
 from .FeaturesConfig import FeaturesConfig
@@ -15,6 +19,19 @@ from .SiftFeaturesConfig import SiftFeaturesConfig
 
 from ..MetaObject import MetaObject
 
+
+def _update_train_test_properties(features):
+    h5_train_features = None
+    if _TRAIN_FEATURES_KEY in features.h5_file:
+        h5_train_features = features.h5_file[_TRAIN_FEATURES_KEY]
+
+    h5_test_features = None
+    if _TEST_FEATURES_KEY in features.h5_file:
+        h5_test_features = features.h5_file[_TEST_FEATURES_KEY]
+
+    return MetaObject.override_from_kwargs(features,
+                                           train_features=h5_train_features,
+                                           test_features=h5_test_features)
 
 def _instantiate(config):
     mode = "r" if config.read_only else "r+"
@@ -25,11 +42,15 @@ def _instantiate(config):
     h5_index_features = h5_file[f"{_INDICES_PREFIX}/{_FEATURES_KEY}"]
     h5_index_key_points = h5_file[f"{_INDICES_PREFIX}/{_KEYPOINTS_KEY}"]
 
-    return MetaObject.from_kwargs(h5_file=h5_file,
-                                    features=h5_features,
-                                    key_points=h5_key_points,
-                                    index_to_features=h5_index_features,
-                                    index_to_key_points=h5_index_key_points)
+    features = MetaObject.from_kwargs(h5_file=h5_file,
+                                      features=h5_features,
+                                      key_points=h5_key_points,
+                                      index_to_features=h5_index_features,
+                                      index_to_key_points=h5_index_key_points)
+
+    _update_train_test_properties(features)
+
+    return features
 
 def load(config, dataset_iter):
     """
@@ -60,6 +81,19 @@ def load(config, dataset_iter):
                                 dataset_iter)
 
     return _instantiate(config)
+
+def update_train_test(features, train_indices, test_indices):
+    """
+    Met a jour (ou creee) les datasets train/test des features
+
+    features:
+        MetaObject obtenu par load
+
+    train_indices, test_indices:
+        Index des images a utiliser pour populer les datasets
+    """
+    _update_train_test(features.h5_file, train_indices, test_indices)
+    _update_train_test_properties(features)
 
 def key_points_iter(features, dataset_iter):
     """

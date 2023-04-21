@@ -19,6 +19,9 @@ _KEYPOINTS_DTYPE = np.float32
 
 _INDICES_PREFIX = "indices"
 
+_TRAIN_FEATURES_KEY = "train_features"
+_TEST_FEATURES_KEY = "test_features"
+
 
 def _extract(desc_factory, image):
     kpts, descs = desc_factory.detectAndCompute(image, None)
@@ -137,3 +140,6 @@ def _batch_extract_parallel(config, h5_file, dataset_iter):
                      chunk_size=config.chunk_size)
 
     _batch_merge(config, h5_file, batch_accum)
+
+def _update_train_test(h5_file, train_indices, test_indices):
+    pass
