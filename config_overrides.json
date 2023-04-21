@@ -1,45 +1,37 @@
 {
     "dataset": {
         "url": "https://tinyurl.com/22tas3na",
-        "install_path": "dataset/PlantVillage.hd5",
-        "force_install": false
+        "install_path": "dataset/PlantVillage.hd5"
     },
     "orb": {
         "features": {
             "install_path": "dataset/OrbFeatures.hd5",
-            "force_generate": false,
             "nfeatures": 500
         },
         "bovw": {
             "install_path": "dataset/OrbBoVW.pkl",
-            "force_generate": false,
             "n_clusters": 500
         },
         "dataset_vw": {
-            "install_path": "dataset/OrbVW.hd5",
-            "force_generate": false
+            "install_path": "dataset/OrbVW.hd5"
         }
     },
     "sift": {
         "features": {
             "install_path": "dataset/SiftFeatures.hd5",
-            "force_generate": false,
             "nfeatures": 500
         },
         "bovw": {
             "install_path": "dataset/SiftBoVW.pkl",
-            "force_generate": false,
             "n_clusters": 500
         },
         "dataset_vw": {
             "install_path": "dataset/SiftVW.hd5",
-            "force_generate": false,
             "chunk_size": 25
         }
     },
     "split": {
-        "train_install_path": "dataset/train.txt",
-        "test_install_path": "dataset/test.txt"
+        "train_install_path": "dataset/train.csv",
+        "test_install_path": "dataset/test.csv"
     }
-
 }

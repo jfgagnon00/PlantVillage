@@ -9,8 +9,11 @@ class Config():
         self.species_disease_re = "(.*)(?:___)(.*)"
         self.species_re = "(.*)(?:,_|_)(.*)"
         self.label_separator = "_"
-        self.thumbnail_scale = 0.25
+
+        self.train_install_path = ""
+        self.test_install_path = ""
 
         self.force_download = False
+        self.force_install = False
         self.read_only = True
         self.executor = executor
