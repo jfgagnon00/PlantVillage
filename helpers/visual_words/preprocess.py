@@ -9,7 +9,9 @@ from tqdm.notebook import tqdm
 from ..Concurrent import parallel_for
 from ..MetaObject import MetaObject
 
-_VISUAL_WORDS_FREQS_KEY = "vw_freqs"
+_VISUAL_WORDS_FREQS_KEY = "vw_freqs/all"
+_TRAIN_VISUAL_WORDS_FREQS_KEY = "vw_freqs/train"
+_TEST_VISUAL_WORDS_FREQS_KEY = "vw_freqs/test"
 _INDEX_TO_VISUAL_WORDS_FREQS_KEY = "indices/vw_freqs"
 
 # TODO: changer en np.uint16
@@ -89,17 +91,34 @@ def _batch_merge(h5_file, batch_accum, n_clusters):
 
     h5_file.create_virtual_dataset(_VISUAL_WORDS_FREQS_KEY, layout)
 
+def _ordered_dataset(ds_name, h5_file, indices, n_clusters):
+    index_to_vs = h5_file[_INDEX_TO_VISUAL_WORDS_FREQS_KEY]
+
+    layout = h5py.VirtualLayout((len(indices), n_clusters), dtype=_VISUAL_WORDS_FREQS_TYPE)
+
+    start = 0
+    for index in indices:
+        batch = index_to_vs[ str(index) ]
+        stop = start + batch.shape[0]
+        layout[start:stop, ...] = h5py.VirtualSource(batch)
+        start = stop
+
+    h5_file.create_virtual_dataset(ds_name, layout)
+
 def _batch_extract_parallel(config,
                             features,
                             bovw_model,
-                            indices_iter,
+                            train_indices,
+                            test_indices,
                             h5_file):
     batch_accum = MetaObject.from_kwargs(
         vw_count=0,
         vw_ds_name=[])
 
-    with tqdm(total=len(indices_iter)) as progress:
-        parallel_for(indices_iter,
+    all_indices = train_indices + test_indices
+
+    with tqdm(total=len(all_indices)) as progress:
+        parallel_for(all_indices,
                      _batch_extract,
                      features,
                      bovw_model,
@@ -109,3 +128,5 @@ def _batch_extract_parallel(config,
                      chunk_size=config.chunk_size)
 
     _batch_merge(h5_file, batch_accum, bovw_model.n_clusters)
+    _ordered_dataset(_TRAIN_VISUAL_WORDS_FREQS_KEY, h5_file, train_indices, bovw_model.n_clusters)
+    _ordered_dataset(_TEST_VISUAL_WORDS_FREQS_KEY, h5_file, test_indices, bovw_model.n_clusters)

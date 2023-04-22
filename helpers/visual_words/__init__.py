@@ -7,6 +7,8 @@ from .DatasetVWConfig import DatasetVWConfig
 from .preprocess import _preprocess_bag_model, \
                         _batch_extract_parallel, \
                         _VISUAL_WORDS_FREQS_KEY, \
+                        _TRAIN_VISUAL_WORDS_FREQS_KEY, \
+                        _TEST_VISUAL_WORDS_FREQS_KEY, \
                         _INDEX_TO_VISUAL_WORDS_FREQS_KEY
 from .VisualWords import VisualWords
 from ..MetaObject import MetaObject
@@ -24,10 +26,14 @@ def _instantiate_dataset(config):
 
     h5_file = h5py.File(config.install_path, mode)
     h5_vw_freqs = h5_file[_VISUAL_WORDS_FREQS_KEY]
+    h5_train_vw_freqs = h5_file[_TRAIN_VISUAL_WORDS_FREQS_KEY]
+    h5_test_vw_freqs = h5_file[_TEST_VISUAL_WORDS_FREQS_KEY]
     h5_index_to_vw_freqs = h5_file[_INDEX_TO_VISUAL_WORDS_FREQS_KEY]
 
     return MetaObject.from_kwargs(h5_file=h5_file,
                                   vw_freqs=h5_vw_freqs,
+                                  train_vw_freqs=h5_train_vw_freqs,
+                                  test_vw_freqs=h5_test_vw_freqs,
                                   index_to_vw_freqs=h5_index_to_vw_freqs)
 
 def load_bovw(config, features):
@@ -59,7 +65,11 @@ def load_bovw(config, features):
 
     return _instantiate_bag(config)
 
-def load_dataset_vw(config, features, bovw_model, indices_iter):
+def load_dataset_vw(config,
+                    features,
+                    bovw_model,
+                    train_indices,
+                    test_indices):
     """
     Utilitaire encapsulant extraction/loading en batch des
     visual words d'un dataset.
@@ -73,7 +83,7 @@ def load_dataset_vw(config, features, bovw_model, indices_iter):
     bovw_model:
         model representant le dictionnaire
 
-    indices_iter:
+    train_indices, test_indices:
         Iterateur sur index desires
 
     Retour:
@@ -93,7 +103,8 @@ def load_dataset_vw(config, features, bovw_model, indices_iter):
         _batch_extract_parallel(config,
                                 features,
                                 bovw_model,
-                                indices_iter,
+                                train_indices,
+                                test_indices,
                                 h5_file)
 
     return _instantiate_dataset(config)
