@@ -64,6 +64,8 @@ class VisualWords():
 
         Retour:
             image contenant les key points
+
+        TODO: revoir cette interface. Tres confu
         """
         return cv2.drawKeypoints(image,
                                  _list_to_cv_key_points(key_points),

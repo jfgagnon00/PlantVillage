@@ -130,3 +130,9 @@ def key_points_iter(features, dataset_iter):
                   image_path, \
                   0, \
                   None
+
+def draw_key_points(image, key_points):
+    return cv2.drawKeypoints(image,
+                             _list_to_cv_key_points(key_points),
+                             None,
+                             flags=cv2.DRAW_MATCHES_FLAGS_DEFAULT)
