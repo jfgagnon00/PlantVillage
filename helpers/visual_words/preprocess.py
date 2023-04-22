@@ -31,11 +31,11 @@ def _batch_extract(features,
 
     count = 0
     for index, _, _ in batch_iterables:
+        count += 1
+
         index_str = str(index)
         if not index_str in features.index_to_features:
             continue
-
-        count += 1
 
         features_array = features.index_to_features[index_str][...]
         vw_freq = _extract(bovw_model, n_clusters, features_array)

@@ -79,5 +79,5 @@ def get_configs(config_overrides, executor=None):
                                   orb_dataset_vw=orb_ds_vw_config,
                                   sift=sift_config,
                                   sift_bovw=sift_bovw_config,
-                                  sift_dataset_vw=orb_ds_vw_config,
+                                  sift_dataset_vw=sift_ds_vw_config,
                                   split=split_config)
