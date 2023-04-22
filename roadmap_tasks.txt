@@ -17,24 +17,14 @@ Taches pour ce samedi
                 - https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html
 
     JFG:
-        * assurer que le choix du data est propager dans le pipeline (config_overrides.json)
         * finir le notebook training
 
 Objectifs:
-    * Extraction features des images
-        - squelette est presentation
-
     * Construire le dictionnaire
-        - recherche sur perf debutee
-        - interface avec les autres modules passe par config_overrides.json (tout est manuel)
-        - les bovw sont serialise en avec pickle
         - il faudrait starter analyse pour resampler et analyser les correlations entre features
         - investiguer visualisation pour aider a comprendre les correlations (t-sne)?
         - investiguer d'autres choix de features?
-
-    * Contruire pour chaque image un histogramme en fonction du dictionnaire
-        - traitement par image est fait en partie, il faudrait ajouter le traitement en lot
-        - saver dans fichier hd5 resultats intermediaires ou juste faire les calculs a la demande?
+        - constuire les les visual words par image est etonnement long
 
     * Entrainer KNN et Random Forest
 
@@ -56,3 +46,4 @@ Stretch goal:
     * Size optimal pour dictionnaire (trouver algo et resampler features)
     * TF-IDF pour l'histogramme
     * Passer SIFT Features en half float si besoin
+    * Enlever thumnails
