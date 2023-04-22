@@ -9,6 +9,12 @@ from tqdm.notebook import tqdm
 from ..Concurrent import parallel_for
 from ..MetaObject import MetaObject
 
+_VISUAL_WORDS_FREQS_KEY = "vw_freqs"
+_INDEX_TO_VISUAL_WORDS_FREQS_KEY = "indices/vw_freqs"
+
+# TODO: changer en np.uint16
+_VISUAL_WORDS_FREQS_TYPE = np.int32
+
 
 def _preprocess_bag_model(config, features):
     mb_kmeans = MiniBatchKMeans(n_clusters=config.n_clusters, batch_size=256 * cpu_count())
@@ -23,14 +29,14 @@ def _extract(bovw_model, n_clusters, features_array):
 def _batch_extract(features,
                    bovw_model,
                    h5_file,
-                   batch_iterables):
+                   indices_iterables):
     n_clusters = bovw_model.cluster_centers_.shape[0]
 
-    vw_freqs = np.empty((0, n_clusters), dtype=np.int32)
+    vw_freqs = np.empty((0, n_clusters), dtype=_VISUAL_WORDS_FREQS_TYPE)
     indices = []
 
     count = 0
-    for index, _, _ in batch_iterables:
+    for index in indices_iterables:
         count += 1
 
         index_str = str(index)
@@ -53,11 +59,10 @@ def _batch_extract(features,
         for i, index in enumerate(indices):
             layout = h5py.VirtualLayout((1, vw_freqs.shape[1]), dtype=vw_freqs.dtype)
             layout[...] = h5py.VirtualSource(vw_ds)[i, ...]
-            h5_file.create_virtual_dataset(f"indices/vw/{index}", layout)
+            h5_file.create_virtual_dataset(f"{_INDEX_TO_VISUAL_WORDS_FREQS_KEY}/{index}", layout)
 
-        batch = MetaObject.from_kwargs(
-                    vw_count=vw_freqs.shape[0],
-                    vw_ds_name=batch_name)
+        batch = MetaObject.from_kwargs(vw_count=vw_freqs.shape[0],
+                                       vw_ds_name=batch_name)
     else:
         batch = None
 
@@ -73,7 +78,7 @@ def _batch_done(batch_results, progress, batch_accum):
         batch_accum.vw_ds_name.append(batch.vw_ds_name)
 
 def _batch_merge(h5_file, batch_accum, n_clusters):
-    layout = h5py.VirtualLayout((batch_accum.vw_count, n_clusters), dtype=np.int32)
+    layout = h5py.VirtualLayout((batch_accum.vw_count, n_clusters), dtype=_VISUAL_WORDS_FREQS_TYPE)
 
     start = 0
     for name in batch_accum.vw_ds_name:
@@ -82,19 +87,19 @@ def _batch_merge(h5_file, batch_accum, n_clusters):
         layout[start:stop, ...] = h5py.VirtualSource(batch)
         start = stop
 
-    h5_file.create_virtual_dataset("vw", layout)
+    h5_file.create_virtual_dataset(_VISUAL_WORDS_FREQS_KEY, layout)
 
 def _batch_extract_parallel(config,
                             features,
                             bovw_model,
-                            dataset_iter,
+                            indices_iter,
                             h5_file):
     batch_accum = MetaObject.from_kwargs(
         vw_count=0,
         vw_ds_name=[])
 
-    with tqdm(total=dataset_iter.count) as progress:
-        parallel_for(dataset_iter,
+    with tqdm(total=len(indices_iter)) as progress:
+        parallel_for(indices_iter,
                      _batch_extract,
                      features,
                      bovw_model,
@@ -103,4 +108,4 @@ def _batch_extract_parallel(config,
                      executor=config.executor,
                      chunk_size=config.chunk_size)
 
-    _batch_merge(h5_file, batch_accum, bovw_model.cluster_centers_.shape[0])
+    _batch_merge(h5_file, batch_accum, bovw_model.n_clusters)

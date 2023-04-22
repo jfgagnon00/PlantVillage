@@ -4,7 +4,10 @@ import pickle
 
 from .BoVWConfig import BoVWConfig
 from .DatasetVWConfig import DatasetVWConfig
-from .preprocess import _preprocess_bag_model, _batch_extract_parallel
+from .preprocess import _preprocess_bag_model, \
+                        _batch_extract_parallel, \
+                        _VISUAL_WORDS_FREQS_KEY, \
+                        _INDEX_TO_VISUAL_WORDS_FREQS_KEY
 from .VisualWords import VisualWords
 from ..MetaObject import MetaObject
 
@@ -20,12 +23,12 @@ def _instantiate_dataset(config):
     mode = "r" if config.read_only else "r+"
 
     h5_file = h5py.File(config.install_path, mode)
-    h5_vw_freqs = h5_file["vw"]
-    h5_index_to_vw_freqs = h5_file["indices/vw"]
+    h5_vw_freqs = h5_file[_VISUAL_WORDS_FREQS_KEY]
+    h5_index_to_vw_freqs = h5_file[_INDEX_TO_VISUAL_WORDS_FREQS_KEY]
 
     return MetaObject.from_kwargs(h5_file=h5_file,
-                                  h5_vw_freqs=h5_vw_freqs,
-                                  h5_index_to_vw_freqs=h5_index_to_vw_freqs)
+                                  vw_freqs=h5_vw_freqs,
+                                  index_to_vw_freqs=h5_index_to_vw_freqs)
 
 def load_bovw(config, features):
     """
@@ -56,7 +59,7 @@ def load_bovw(config, features):
 
     return _instantiate_bag(config)
 
-def load_dataset_vw(config, features, bovw_model, dataset_iter):
+def load_dataset_vw(config, features, bovw_model, indices_iter):
     """
     Utilitaire encapsulant extraction/loading en batch des
     visual words d'un dataset.
@@ -70,8 +73,8 @@ def load_dataset_vw(config, features, bovw_model, dataset_iter):
     bovw_model:
         model representant le dictionnaire
 
-    dataset_iter:
-        Instance de DatasetIter
+    indices_iter:
+        Iterateur sur index desires
 
     Retour:
         MetaObject encapsulant le tous les visual words d'un dataset. Si le
@@ -90,7 +93,7 @@ def load_dataset_vw(config, features, bovw_model, dataset_iter):
         _batch_extract_parallel(config,
                                 features,
                                 bovw_model,
-                                dataset_iter,
+                                indices_iter,
                                 h5_file)
 
     return _instantiate_dataset(config)
