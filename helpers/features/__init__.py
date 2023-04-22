@@ -5,7 +5,7 @@ import os
 
 
 from .extraction import _batch_extract_parallel, \
-                        _update_train_test, \
+                        _update_virtual_features_dataset, \
                         _FEATURES_KEY, \
                         _INDICES_PREFIX, \
                         _KEYPOINTS_KEY, \
@@ -92,7 +92,9 @@ def update_train_test(features, train_indices, test_indices):
     train_indices, test_indices:
         Index des images a utiliser pour populer les datasets
     """
-    _update_train_test(features.h5_file, train_indices, test_indices)
+    _update_virtual_features_dataset(features.h5_file, _TRAIN_FEATURES_KEY, train_indices)
+    _update_virtual_features_dataset(features.h5_file, _TEST_FEATURES_KEY, test_indices)
+    features.h5_file.flush()
     _update_train_test_properties(features)
 
 def key_points_iter(features, dataset_iter):

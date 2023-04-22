@@ -141,5 +141,40 @@ def _batch_extract_parallel(config, h5_file, dataset_iter):
 
     _batch_merge(config, h5_file, batch_accum)
 
-def _update_train_test(h5_file, train_indices, test_indices):
-    pass
+def _update_virtual_features_dataset(h5_file, name, indices):
+    index_to_features = f"{_INDICES_PREFIX}/{_FEATURES_KEY}"
+
+    # amasser toutes les sources indiquer par indices
+    virtual_sources = []
+    features_count = 0
+    for i in indices:
+        i_str = str(i)
+        if i_str in h5_file[index_to_features]:
+            ds = h5_file[index_to_features][i_str]
+            features_count += ds.shape[0]
+
+            # https://docs.h5py.org/en/stable/high/dataset.html#reference
+            vs = ds.virtual_sources()
+
+            virtual_sources.extend(vs)
+
+    # en faire un dataset virtuel
+    features_ds = h5_file[_FEATURES_KEY]
+    dataset_layout = h5py.VirtualLayout((features_count, features_ds.shape[1]), dtype=features_ds.dtype)
+
+    offset = 0
+    for vs in virtual_sources:
+        # https://api.h5py.org/h5s.html#h5py.h5s.SpaceID
+        source_ds = h5_file[vs[2]]
+        source_start, source_end = vs[3].get_select_bounds()
+        source_start, source_end = source_start[0], source_end[0]
+        source_size = source_end - source_start + 1
+
+        dataset_layout[offset:offset + source_size, ...] = h5py.VirtualSource(source_ds)[source_start:source_start + source_size, ...]
+
+        offset += source_size
+
+    if name in h5_file:
+        del h5_file[name]
+
+    h5_file.create_virtual_dataset(name, dataset_layout)
