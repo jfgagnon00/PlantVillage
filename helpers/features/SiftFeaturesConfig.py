@@ -20,4 +20,4 @@ class SiftFeaturesConfig(FeaturesConfig):
         return np.float32
 
     def create_factory(self):
-        return cv2.xfeatures2d.SIFT_create(self.nfeatures)
+        return cv2.SIFT_create(self.nfeatures)
