@@ -111,15 +111,22 @@ def key_points_iter(features, dataset_iter):
     Retour:
         Voir ci-bas
     """
-    for index, image_path, image_future in dataset_iter:
-        image = image_future()
-        key_points = features.index_to_key_points[str(index)][...]
-        key_points = _list_to_cv_key_points(key_points)
+    for index, image_path, image_future in dataset_iter:        
+        index_str = str(index)
+        if index_str in features.index_to_key_points:
+            image = image_future()
+            key_points = features.index_to_key_points[str(index)][...]
+            key_points = _list_to_cv_key_points(key_points)
 
-        yield index, \
-              image_path, \
-              len(key_points), \
-              cv2.drawKeypoints(image,
-                                key_points,
-                                None,
-                                flags=cv2.DRAW_MATCHES_FLAGS_DEFAULT)
+            yield index, \
+                image_path, \
+                len(key_points), \
+                cv2.drawKeypoints(image,
+                                  key_points,
+                                  None,
+                                  flags=cv2.DRAW_MATCHES_FLAGS_DEFAULT)
+        else:
+            yield index, \
+                  image_path, \
+                  0, \
+                  None
