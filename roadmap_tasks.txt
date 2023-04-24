@@ -17,7 +17,8 @@ Taches pour ce samedi
                 - https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html
 
     JFG:
-        * finir le notebook training
+        * refaire extraction avec tiles
+        * TF-IDF
 
 Objectifs:
     * Construire le dictionnaire
@@ -44,6 +45,5 @@ Objectifs:
 Stretch goal:
     * Segmentation background/foreground pour feature extraction
     * Size optimal pour dictionnaire (trouver algo et resampler features)
-    * TF-IDF pour l'histogramme
     * Passer SIFT Features en half float si besoin
     * Enlever thumnails
