@@ -19,7 +19,9 @@ _VISUAL_WORDS_FREQS_TYPE = np.int32
 
 
 def _preprocess_bag_model(config, features):
-    mb_kmeans = MiniBatchKMeans(n_clusters=config.n_clusters, batch_size=256 * cpu_count())
+    mb_kmeans = MiniBatchKMeans(n_clusters=config.n_clusters,
+                                batch_size=256 * cpu_count(),
+                                n_init="auto")
     return mb_kmeans.fit(features)
 
 def _extract(bovw_model, n_clusters, features_array):
