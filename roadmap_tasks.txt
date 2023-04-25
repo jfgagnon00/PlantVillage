@@ -1,26 +1,21 @@
 Taches pour ce samedi
     Fred:
-        * continue Segmentation
         * optimization size dictionaire
 
     Michele:
-        * regarder comment comment on peut enlever de features a SIFT (reduire le 128)
-            1 image == M x 128 (m descriptors, chaque desc a 128 floats)
-                - mesure dependance entre quantitatif continue et label?
-                    - https://scikit-learn.org/stable/modules/generated/sklearn.feature_selection.SelectKBest.html#sklearn.feature_selection.SelectKBest
-                    - https://scikit-learn.org/stable/modules/generated/sklearn.feature_selection.f_classif.html
+        * Merger notebook 02 et 03 et complementer exploration
 
-                - https://scikit-learn.org/stable/modules/generated/sklearn.feature_selection.SelectFromModel.html
-                    DecisionTreeClassifier()
-                    RandomForest()
-
-                - https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html
+        * pour optim dictionnaire SIFT, resampler grape prendre moins de data
+            optimization size dictionaire (random forest pour selecitonner le nombre de cluster)
 
     JFG:
-        * refaire extraction avec tiles
         * TF-IDF
+        * Enlever thumnails
+        * Passer SIFT Features en half float si besoin
+
 
 Objectifs:
+    * flush orb, garde sift
     * Construire le dictionnaire
         - il faudrait starter analyse pour resampler et analyser les correlations entre features
         - investiguer visualisation pour aider a comprendre les correlations (t-sne)?
@@ -43,7 +38,4 @@ Objectifs:
     * Rapport + presentation
 
 Stretch goal:
-    * Segmentation background/foreground pour feature extraction
-    * Size optimal pour dictionnaire (trouver algo et resampler features)
-    * Passer SIFT Features en half float si besoin
-    * Enlever thumnails
+    * Segmentation
