@@ -10,7 +10,7 @@ Taches pour ce samedi
 
     JFG:
         * TF-IDF
-        * Enlever thumnails
+            definition ajuster pour count 0: https://www.capitalone.com/tech/machine-learning/understanding-tf-idf/
         * Passer SIFT Features en half float si besoin
 
 

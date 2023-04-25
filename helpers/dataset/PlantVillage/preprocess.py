@@ -13,28 +13,22 @@ from ...Concurrent import parallel_for
 from ...MetaObject import MetaObject
 
 
-_THUMBNAILS_KEY = "thumbnails"
-
 _DATAFRAME_KEY = "dataframe"
 _DATAFRAME_SOURCE_ATTR = "dataframe_source"
 _DATAFRAME_COLUMNS = ["species",
                       "disease",
                       "label",
-                      "image_path",
-                      "thumbnail_path"]
+                      "image_path"]
 _DATAFRAME_ENCODING = "utf-8"
 
 
 def _initialize_h5(h5_file, zip_basename):
-    h5_thumbnails = h5_file.create_group(_THUMBNAILS_KEY)
-
     h5_dataframe = h5_file.create_group(_DATAFRAME_KEY)
     h5_dataframe.attrs[_DATAFRAME_SOURCE_ATTR] = zip_basename.encode(_DATAFRAME_ENCODING)
 
     dataframe_data = {k: [] for k in _DATAFRAME_COLUMNS}
 
     return MetaObject.from_dict({
-                "thumbnails": h5_thumbnails,
                 "dataframe": h5_dataframe,
                 "dataframe_data": dataframe_data
            })
@@ -46,12 +40,7 @@ def _update_h5_dataframe(h5_meta):
                                          data=data,
                                          dtype=h5py.string_dtype(encoding=_DATAFRAME_ENCODING))
 
-def _update_h5(h5_meta,
-               name,
-               thumbnail,
-               dataframe):
-    h5_meta.thumbnails.create_dataset(name, data=thumbnail)
-
+def _update_h5(h5_meta, _, dataframe):
     if not dataframe is None:
         for key, value in dataframe.items():
             h5_meta.dataframe_data[key].append(value)
@@ -86,10 +75,9 @@ def _extract_dataframe(config, filename):
         "disease": plant_disease.encode(_DATAFRAME_ENCODING),
         "label": label.encode(_DATAFRAME_ENCODING),
         "image_path": filename.encode(_DATAFRAME_ENCODING),
-        "thumbnail_path": "/".join([_THUMBNAILS_KEY, filename]).encode(_DATAFRAME_ENCODING)
     }
 
-def _preprocess(config, zip_file, zip_info):
+def _preprocess(config, zip_info):
     if zip_info.is_dir():
         return None
 
@@ -99,14 +87,7 @@ def _preprocess(config, zip_file, zip_info):
     if dataframe is None:
         return None
 
-    image = _get_image_zip_info(zip_file, zip_info)
-
-    h, w, _ = image.shape
-    th = math.ceil(h * config.thumbnail_scale)
-    tw = math.ceil(w * config.thumbnail_scale)
-    thumbnail = cv2.resize(image, (tw, th))
-
-    return filename, thumbnail, dataframe
+    return filename, dataframe
 
 def _preprocess_parallel(config, zip_filename):
     with h5py.File(config.install_path, "w") as h5_file:
@@ -127,7 +108,6 @@ def _preprocess_parallel(config, zip_filename):
                 parallel_for(zip_infos,
                     _preprocess,
                     config,
-                    zip_file,
                     task_completed=_preprocess_completed,
                     executor=config.executor)
 
