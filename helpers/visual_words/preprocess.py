@@ -13,9 +13,9 @@ _VISUAL_WORDS_FREQS_KEY = "vw_freqs/all"
 _TRAIN_VISUAL_WORDS_FREQS_KEY = "vw_freqs/train"
 _TEST_VISUAL_WORDS_FREQS_KEY = "vw_freqs/test"
 _INDEX_TO_VISUAL_WORDS_FREQS_KEY = "indices/vw_freqs"
+_IDF_KEY = "vw_freqs/train_idf"
 
-# TODO: changer en np.uint16
-_VISUAL_WORDS_FREQS_TYPE = np.int32
+_VISUAL_WORDS_FREQS_TYPE = np.float16
 
 
 def _preprocess_bag_model(config, features):
@@ -27,6 +27,8 @@ def _preprocess_bag_model(config, features):
 def _extract(bovw_model, n_clusters, features_array):
     vw_freq = bovw_model.predict(features_array)
     vw_freq = np.bincount(vw_freq, minlength=n_clusters)
+    vw_freq = vw_freq / float(n_clusters)
+    vw_freq = vw_freq.astype(_VISUAL_WORDS_FREQS_TYPE)
 
     return vw_freq
 
@@ -129,6 +131,19 @@ def _batch_extract_parallel(config,
                      executor=config.executor,
                      chunk_size=config.chunk_size)
 
-    _batch_merge(h5_file, batch_accum, bovw_model.n_clusters)
-    _ordered_dataset(_TRAIN_VISUAL_WORDS_FREQS_KEY, h5_file, train_indices, bovw_model.n_clusters)
-    _ordered_dataset(_TEST_VISUAL_WORDS_FREQS_KEY, h5_file, test_indices, bovw_model.n_clusters)
+    n_clusters = bovw_model.n_clusters
+    _batch_merge(h5_file, batch_accum, n_clusters)
+
+    _ordered_dataset(_TRAIN_VISUAL_WORDS_FREQS_KEY, h5_file, train_indices, n_clusters)
+    _ordered_dataset(_TEST_VISUAL_WORDS_FREQS_KEY, h5_file, test_indices, n_clusters)
+
+def _get_idf(dataset_vw_h5_file):
+    vw_freqs = dataset_vw_h5_file[_TRAIN_VISUAL_WORDS_FREQS_KEY]
+
+    idf = np.count_nonzero(vw_freqs, axis=0)
+    idf = float(1 + vw_freqs.shape[0]) / (idf + 1)
+    idf = np.log(idf) + 1.0
+    idf = idf.astype(np.float32)
+    idf = np.expand_dims(idf, axis=0)
+
+    return idf

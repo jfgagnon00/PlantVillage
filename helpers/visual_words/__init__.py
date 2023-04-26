@@ -6,6 +6,7 @@ from .BoVWConfig import BoVWConfig
 from .DatasetVWConfig import DatasetVWConfig
 from .preprocess import _preprocess_bag_model, \
                         _batch_extract_parallel, \
+                        _get_idf, \
                         _VISUAL_WORDS_FREQS_KEY, \
                         _TRAIN_VISUAL_WORDS_FREQS_KEY, \
                         _TEST_VISUAL_WORDS_FREQS_KEY, \
@@ -14,12 +15,16 @@ from .VisualWords import VisualWords
 from ..MetaObject import MetaObject
 
 
+def _write_bag(config, idf, model):
+    with open(config.install_path, "wb") as pickled_file:
+        pickle.dump((idf, model), pickled_file)
+
 def _instantiate_bag(config):
     with open(config.install_path, "rb") as pickled_file:
-        model = pickle.load(pickled_file)
+        (idf, model) = pickle.load(pickled_file)
 
-    # TODO: ajouter des attribut wrapper?
-    return MetaObject.from_kwargs(model=model)
+    return MetaObject.from_kwargs(model=model,
+                                  idf=idf)
 
 def _instantiate_dataset(config):
     mode = "r" if config.read_only else "r+"
@@ -60,14 +65,14 @@ def load_bovw(config, features):
 
     print("Construction Bag of Visual Words")
     model = _preprocess_bag_model(config, features)
-    with open(config.install_path, "wb") as pickled_file:
-        pickle.dump(model, pickled_file)
+    _write_bag(config, None, model)
 
     return _instantiate_bag(config)
 
-def load_dataset_vw(config,
+def load_dataset_vw(dataset_vw_config,
                     features,
-                    bovw_model,
+                    bovw_config,
+                    bovw_metaobject,
                     train_indices,
                     test_indices):
     """
@@ -80,8 +85,8 @@ def load_dataset_vw(config,
     features:
         MetaObject features servant a construire les visual words
 
-    bovw_model:
-        model representant le dictionnaire
+    bovw_metaobject:
+        MetaObject retourne par load_bovw()
 
     train_indices, test_indices:
         Iterateur sur index desires
@@ -90,21 +95,25 @@ def load_dataset_vw(config,
         MetaObject encapsulant le tous les visual words d'un dataset. Si le
         fichier demande existe, il est retourne sinon il est construit.
     """
-    if not config.force_generate and os.path.exists(config.install_path):
-        return _instantiate_dataset(config)
+    if not dataset_vw_config.force_generate and \
+        os.path.exists(dataset_vw_config.install_path):
+        return _instantiate_dataset(dataset_vw_config)
 
-    if config.force_generate or not os.path.exists(config.install_path):
-        path, file  = os.path.split(config.install_path)
+    if dataset_vw_config.force_generate or \
+        not os.path.exists(dataset_vw_config.install_path):
+        path, file  = os.path.split(dataset_vw_config.install_path)
         if not file is None:
             os.makedirs(path, exist_ok=True)
 
     print("Construction Visual Words")
-    with h5py.File(config.install_path, "w") as h5_file:
-        _batch_extract_parallel(config,
+    with h5py.File(dataset_vw_config.install_path, "w") as h5_file:
+        _batch_extract_parallel(dataset_vw_config,
                                 features,
-                                bovw_model,
+                                bovw_metaobject.model,
                                 train_indices,
                                 test_indices,
                                 h5_file)
+        bovw_metaobject.idf = _get_idf(h5_file)
+        _write_bag(bovw_config, bovw_metaobject.idf, bovw_metaobject.model)
 
-    return _instantiate_dataset(config)
+    return _instantiate_dataset(dataset_vw_config)

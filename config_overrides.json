@@ -9,7 +9,7 @@
             "nfeatures": 500
         },
         "bovw": {
-            "install_path": "dataset/OrbBoVW.pkl",
+            "install_path": "models/OrbBoVW.pkl",
             "n_clusters": 500
         },
         "dataset_vw": {
@@ -23,7 +23,7 @@
             "nfeatures": 500
         },
         "bovw": {
-            "install_path": "dataset/SiftBoVW.pkl",
+            "install_path": "models/SiftBoVW.pkl",
             "n_clusters": 500
         },
         "dataset_vw": {
