@@ -23,10 +23,10 @@ class VisualWords():
 
         TODO: a reviser?
     """
-    def __init__(self, features_config, bovw_model):
+    def __init__(self, features_config, bovw_metaobject):
         self._desc_factory = features_config.create_factory()
-        self._bovw_model = bovw_model
-        self._n_clusters = bovw_model.cluster_centers_.shape[0]
+        self._bovw_model = bovw_metaobject.model
+        self._n_clusters = bovw_metaobject.cluster_centers.shape[0]
 
     @property
     def n_clusters(self):

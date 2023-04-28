@@ -111,6 +111,7 @@ def load_dataset_vw(dataset_vw_config,
         _batch_extract_parallel(dataset_vw_config,
                                 features,
                                 bovw_metaobject.model,
+                                bovw_metaobject.cluster_centers.shape[0],
                                 train_indices,
                                 test_indices,
                                 h5_file)

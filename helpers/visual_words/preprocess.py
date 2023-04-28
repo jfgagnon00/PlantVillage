@@ -40,16 +40,14 @@ def _extract(bovw_model, n_clusters, features_array):
     vw_freq = bovw_model.predict(features_array)
     vw_freq = np.bincount(vw_freq, minlength=n_clusters)
     vw_freq = vw_freq / float(n_clusters)
-    vw_freq = vw_freq.astype(_VISUAL_WORDS_FREQS_TYPE)
 
     return vw_freq
 
 def _batch_extract(features,
                    bovw_model,
+                   n_clusters,
                    h5_file,
                    indices_iterables):
-    n_clusters = bovw_model.cluster_centers_.shape[0]
-
     vw_freqs = np.empty((0, n_clusters), dtype=_VISUAL_WORDS_FREQS_TYPE)
     indices = []
 
@@ -63,6 +61,7 @@ def _batch_extract(features,
 
         features_array = features.index_to_features[index_str][...]
         vw_freq = _extract(bovw_model, n_clusters, features_array)
+        vw_freq = vw_freq.astype(_VISUAL_WORDS_FREQS_TYPE)
         vw_freq = np.expand_dims(vw_freq, axis=0)
 
         vw_freqs = np.append(vw_freqs, vw_freq, axis=0)
@@ -124,6 +123,7 @@ def _ordered_dataset(ds_name, h5_file, indices, n_clusters):
 def _batch_extract_parallel(config,
                             features,
                             bovw_model,
+                            n_clusters,
                             train_indices,
                             test_indices,
                             h5_file):
@@ -138,12 +138,12 @@ def _batch_extract_parallel(config,
                      _batch_extract,
                      features,
                      bovw_model,
+                     n_clusters,
                      h5_file,
                      task_completed=lambda r: _batch_done(r, progress, batch_accum),
                      executor=config.executor,
                      chunk_size=config.chunk_size)
 
-    n_clusters = bovw_model.n_clusters
     _batch_merge(h5_file, batch_accum, n_clusters)
 
     _ordered_dataset(_TRAIN_VISUAL_WORDS_FREQS_KEY, h5_file, train_indices, n_clusters)
