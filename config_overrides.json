@@ -10,7 +10,8 @@
         },
         "bovw": {
             "install_path": "models/OrbBoVW.pkl",
-            "n_clusters": 500
+            "kmeans_n_clusters": 500,
+            "pca_n_components": 26
         },
         "dataset_vw": {
             "install_path": "dataset/OrbVW.hd5",
@@ -24,7 +25,8 @@
         },
         "bovw": {
             "install_path": "models/SiftBoVW.pkl",
-            "n_clusters": 500
+            "kmeans_n_clusters": 500,
+            "pca_n_components": 80
         },
         "dataset_vw": {
             "install_path": "dataset/SiftVW.hd5",

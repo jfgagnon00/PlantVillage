@@ -4,6 +4,9 @@ import uuid
 
 from os  import cpu_count
 from sklearn.cluster import MiniBatchKMeans
+from sklearn.decomposition import PCA
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
 from tqdm.notebook import tqdm
 
 from ..Concurrent import parallel_for
@@ -19,10 +22,19 @@ _VISUAL_WORDS_FREQS_TYPE = np.float16
 
 
 def _preprocess_bag_model(config, features):
-    mb_kmeans = MiniBatchKMeans(n_clusters=config.n_clusters,
-                                batch_size=256 * cpu_count(),
-                                n_init="auto")
-    return mb_kmeans.fit(features)
+    if config.pca_n_components is None:
+        n_components = None
+    else:
+        n_components = min(config.pca_n_components, features.shape[1])
+        n_components = n_components if n_components > 0 else None
+
+    bovw_model = Pipeline([("scaler", StandardScaler()),
+                           ("pca", PCA(svd_solver="full",
+                                       n_components=n_components)),
+                           ("kmeans", MiniBatchKMeans(n_clusters=config.kmeans_n_clusters,
+                                                      batch_size=256 * cpu_count(),
+                                                      n_init="auto"))])
+    return bovw_model.fit(features)
 
 def _extract(bovw_model, n_clusters, features_array):
     vw_freq = bovw_model.predict(features_array)

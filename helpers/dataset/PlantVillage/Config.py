@@ -17,6 +17,3 @@ class Config():
         self.force_install = False
         self.read_only = True
         self.executor = executor
-
-        
-        self.thumbnail_scale = 0.25

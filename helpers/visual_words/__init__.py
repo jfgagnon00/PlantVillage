@@ -24,7 +24,8 @@ def _instantiate_bag(config):
         (idf, model) = pickle.load(pickled_file)
 
     return MetaObject.from_kwargs(model=model,
-                                  idf=idf)
+                                  idf=idf,
+                                  cluster_centers=model["kmeans"].cluster_centers_)
 
 def _instantiate_dataset(config):
     mode = "r" if config.read_only else "r+"
