@@ -26,10 +26,6 @@ class VisualWords():
         self._bovw_model = bovw_metaobject.model
         self._n_clusters = bovw_metaobject.cluster_centers.shape[0]
 
-    @property
-    def n_clusters(self):
-        return self._n_clusters
-
     def extract(self, image):
         """
         Extraction des key points, features et visual words
