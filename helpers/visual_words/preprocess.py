@@ -30,7 +30,8 @@ def _preprocess_bag_model(config, features):
 
     bovw_model = Pipeline([("scaler", StandardScaler()),
                            ("pca", PCA(svd_solver="full",
-                                       n_components=n_components)),
+                                       n_components=n_components,
+                                       random_state=42)),
                            ("kmeans", MiniBatchKMeans(n_clusters=config.kmeans_n_clusters,
                                                       batch_size=256 * cpu_count(),
                                                       n_init="auto"))])

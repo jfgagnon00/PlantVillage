@@ -21,11 +21,12 @@
     "sift": {
         "features": {
             "install_path": "dataset/SiftFeatures.hd5",
-            "nfeatures": 500
+            "nfeatures": 500,
+            "chunk_size": 30
         },
         "bovw": {
             "install_path": "models/SiftBoVW.pkl",
-            "kmeans_n_clusters": 500,
+            "kmeans_n_clusters": 175,
             "pca_n_components": 80
         },
         "dataset_vw": {
