@@ -1,13 +1,9 @@
-import cv2
 import h5py
-import math
 import os
 import re
 
 from tqdm.notebook import tqdm
 from zipfile import ZipFile
-
-from .image_readers import _get_image_zip_info
 
 from ...Concurrent import parallel_for
 from ...MetaObject import MetaObject
