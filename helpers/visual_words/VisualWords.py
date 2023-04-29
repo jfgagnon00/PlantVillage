@@ -31,16 +31,21 @@ class VisualWords():
 
     @classmethod
     def from_sift_configs(cls, configs):
+        """
+        Factory methode
+        """
         sift_bovw = load_bovw(configs.sift_bovw, None)
 
         instance = VisualWords()
         instance._desc_factory = configs.sift.create_factory()
         instance._bovw_model = sift_bovw.model
         instance._bovw_idf = sift_bovw.idf
-        instance._n_clusters = sift_bovw.model.cluster_centers.shape[0]
+        instance._n_clusters = sift_bovw.cluster_centers.shape[0]
 
         with open(configs.sift_classifier.install_path, "rb") as file:
             instance._classifier_model = pickle.load(file)
+
+        return instance
 
     def predict(self, image):
         """
