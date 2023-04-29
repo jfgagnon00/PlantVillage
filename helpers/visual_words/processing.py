@@ -38,7 +38,7 @@ def _preprocess_bag_model(config, features):
 
 def _extract(bovw_model, n_clusters, features_array):
     # revoir comment tf-idf est gerer, c'est confus pour le moment
-    # chaque personne l'utilisant doit etre a courant
+    # chaque personne l'utilisant doit etre au courant
     vw_freq = bovw_model.predict(features_array)
     vw_freq = np.bincount(vw_freq, minlength=n_clusters)
     vw_freq = vw_freq / float(n_clusters)

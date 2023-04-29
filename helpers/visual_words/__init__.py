@@ -4,6 +4,7 @@ import pickle
 
 from .BoVWConfig import BoVWConfig
 from .DatasetVWConfig import DatasetVWConfig
+from .ClassifierConfig import ClassifierConfig
 from .processing import _preprocess_bag_model, \
                         _batch_extract_parallel, \
                         _get_idf, \
@@ -11,7 +12,6 @@ from .processing import _preprocess_bag_model, \
                         _TRAIN_VISUAL_WORDS_FREQS_KEY, \
                         _TEST_VISUAL_WORDS_FREQS_KEY, \
                         _INDEX_TO_VISUAL_WORDS_FREQS_KEY
-from .VisualWords import VisualWords
 from ..MetaObject import MetaObject
 
 

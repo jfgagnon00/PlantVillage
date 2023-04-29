@@ -16,6 +16,9 @@
         "dataset_vw": {
             "install_path": "dataset/OrbVW.hd5",
             "chunk_size": 10
+        },
+        "classifier": {
+            "model_install_path": "models/orb_random_forest.pkl"
         }
     },
     "sift": {
@@ -32,6 +35,9 @@
         "dataset_vw": {
             "install_path": "dataset/SiftVW.hd5",
             "chunk_size": 10
+        },
+        "classifier": {
+            "install_path": "models/sift_random_forest.pkl"
         }
     },
     "split": {
