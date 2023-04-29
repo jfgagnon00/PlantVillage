@@ -16,7 +16,6 @@ _VISUAL_WORDS_FREQS_KEY = "vw_freqs/all"
 _TRAIN_VISUAL_WORDS_FREQS_KEY = "vw_freqs/train"
 _TEST_VISUAL_WORDS_FREQS_KEY = "vw_freqs/test"
 _INDEX_TO_VISUAL_WORDS_FREQS_KEY = "indices/vw_freqs"
-_IDF_KEY = "vw_freqs/train_idf"
 
 _VISUAL_WORDS_FREQS_TYPE = np.float16
 
@@ -38,6 +37,8 @@ def _preprocess_bag_model(config, features):
     return bovw_model.fit(features)
 
 def _extract(bovw_model, n_clusters, features_array):
+    # revoir comment tf-idf est gerer, c'est confus pour le moment
+    # chaque personne l'utilisant doit etre a courant
     vw_freq = bovw_model.predict(features_array)
     vw_freq = np.bincount(vw_freq, minlength=n_clusters)
     vw_freq = vw_freq / float(n_clusters)

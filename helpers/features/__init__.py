@@ -110,8 +110,11 @@ def key_points_iter(features, dataset_iter):
 
     Retour:
         Voir ci-bas
+
+    Note:
+        Va etre @deprecated. Interface confuse.
     """
-    for index, image_path, image_future in dataset_iter:        
+    for index, image_path, image_future in dataset_iter:
         index_str = str(index)
         if index_str in features.index_to_key_points:
             image = image_future()

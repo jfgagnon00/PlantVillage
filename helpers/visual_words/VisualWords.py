@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-from .preprocess import _extract as _vw_extract
+from .processing import _extract as _vw_extract
 from ..features.extraction import _extract as _features_extract
 from ..features.key_points import _list_to_cv_key_points
 
@@ -20,8 +20,6 @@ class VisualWords():
 
         Les autres modules sont plus oriente en traitement
         par lot. Ici, on traite 1 element a la fois.
-
-        TODO: a reviser?
     """
     def __init__(self, features_config, bovw_metaobject):
         self._desc_factory = features_config.create_factory()

@@ -4,7 +4,7 @@ import pickle
 
 from .BoVWConfig import BoVWConfig
 from .DatasetVWConfig import DatasetVWConfig
-from .preprocess import _preprocess_bag_model, \
+from .processing import _preprocess_bag_model, \
                         _batch_extract_parallel, \
                         _get_idf, \
                         _VISUAL_WORDS_FREQS_KEY, \

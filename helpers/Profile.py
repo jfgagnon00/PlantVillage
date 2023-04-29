@@ -2,6 +2,15 @@ from time import time
 
 
 class Profile():
+    """
+    Utilitaire pour mesurer la duree d'un bout de code.
+    Utilisation attendues est:
+
+    with Profile() as pro:
+        do_your_stuff()
+
+    print( pro.round_duration() )
+    """
     def __init__(self):
         self._enter = time()
         self._exit = time()

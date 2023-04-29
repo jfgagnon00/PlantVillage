@@ -3,6 +3,9 @@ class DatasetIter():
     Bridge les dataset et l'extraction de features.
     Itere sur une paire (index, image_path) et retourne une promise
     pour lire l'image representee par la paire
+
+    Note:
+        Va etre @deprecated. Interface confuse.
     """
     def __init__(self,
                  dataset,
