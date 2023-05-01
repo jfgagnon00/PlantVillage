@@ -15,12 +15,20 @@ Taches pour next milesote
     Transformation, Analyse, Visualization
         feature extraction
         detailler bag
+        train
 
     Conclusion/interpretation
         discuter sur matrice de confusion et pourquoi
         tf-idf pourquoi
         ce qui pourrait etre a ameliroer
             clustering est faible comme partie
+
+    Annexe
+        organisation du travail
+            git
+            pipeline (python et modules), notebook separe
+            hd5
+            versions des environnements (conda, )
 
 
 Objectifs:
