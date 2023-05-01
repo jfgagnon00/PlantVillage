@@ -1,39 +1,35 @@
-Taches pour ce samedi
-    Fred:
-        * optimization size dictionaire
+Taches pour next milesote
+    # Plan rapport final
 
-    Michele:
-        * Merger notebook 02 et 03 et complementer exploration
+    Intro (mettre dans TOC)
+        decrit dataset
+        decrit methode Bag Of Visual Word
 
-        * pour optim dictionnaire SIFT, resampler grape prendre moins de data
-            optimization size dictionaire (random forest pour selecitonner le nombre de cluster)
+    Pretraitement
+        decrire qu'on a extrait nom de label et de species a partir nom fichiers
 
-    JFG:
-        * TF-IDF
-            definition ajuster pour count 0: https://www.capitalone.com/tech/machine-learning/understanding-tf-idf/
-        * Passer SIFT Features en half float si besoin
+    Exploration
+        (rendre plus concis, montrer qu'il y a trop de data et on se restrain a grape)
+        train/test split
+
+    Transformation, Analyse, Visualization
+        feature extraction
+        detailler bag
+
+    Conclusion/interpretation
+        discuter sur matrice de confusion et pourquoi
+        tf-idf pourquoi
+        ce qui pourrait etre a ameliroer
+            clustering est faible comme partie
 
 
 Objectifs:
-    * flush orb, garde sift
-    * Construire le dictionnaire
-        - il faudrait starter analyse pour resampler et analyser les correlations entre features
-        - investiguer visualisation pour aider a comprendre les correlations (t-sne)?
-        - investiguer d'autres choix de features?
-        - constuire les les visual words par image est etonnement long
-
-    * Entrainer KNN et Random Forest
-
-    * Sauvegarder des modeles
-
     * Wrapper dans "application" (widgets notebook?)
 
     * Optimization des hyperparametres (les valeurs qui sont dans config_overrides.json)
         * choix du type de features (ORB ou SIFT)
         * determiner nombre de features optimales
         * Ajouter un label 'Ca marche pas -  inclassifiable'
-
-    * Evaluer
 
     * Rapport + presentation
 
