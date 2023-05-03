@@ -30,8 +30,8 @@ def _update_train_test_properties(features):
         h5_test_features = features.h5_file[_TEST_FEATURES_KEY]
 
     return MetaObject.override_from_kwargs(features,
-                                           train_features=h5_train_features,
-                                           test_features=h5_test_features)
+                                           train_descriptors=h5_train_features,
+                                           test_descriptors=h5_test_features)
 
 def _instantiate(config):
     mode = "r" if config.read_only else "r+"
@@ -43,7 +43,7 @@ def _instantiate(config):
     h5_index_key_points = h5_file[f"{_INDICES_PREFIX}/{_KEYPOINTS_KEY}"]
 
     features = MetaObject.from_kwargs(h5_file=h5_file,
-                                      features=h5_features,
+                                      descriptors=h5_features,
                                       key_points=h5_key_points,
                                       index_to_features=h5_index_features,
                                       index_to_key_points=h5_index_key_points)
@@ -74,7 +74,7 @@ def load(config, dataset_iter):
         if not file is None:
             os.makedirs(path, exist_ok=True)
 
-    print("Extraire features")
+    print("Extraire key_points & descripteurs")
     with h5py.File(config.install_path, "w") as h5_file:
         _batch_extract_parallel(config,
                                 h5_file,
