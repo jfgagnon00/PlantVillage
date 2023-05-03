@@ -89,7 +89,7 @@ class VisualWordsApp(tk.Tk):
         y = 0.85
         dy = 0.1
 
-        self._info_ax.text(x, y - 0*dy, filename)
+        self._info_ax.text(x, y - 0*dy, filename[-80:])
         self._info_ax.text(x, y - 1*dy, f"# key points: {len(key_points)}")
         self._info_ax.text(x, y - 2*dy, f"Descripteur shape: {features.shape}")
         self._info_ax.text(x, y - 3*dy, f"TF-IDF shape: {tf_idf.shape}")
