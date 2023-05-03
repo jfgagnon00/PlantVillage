@@ -5,7 +5,7 @@ class DatasetVWConfig():
     """
     def __init__(self, executor, chunk_size=150):
         self.install_path = ""
-        self.force_generate = False
+        self.force_generate = True
         self.read_only = True
         self.executor = executor
         self.chunk_size = chunk_size

@@ -5,6 +5,6 @@ class BoVWConfig():
     """
     def __init__(self):
         self.install_path = ""
-        self.force_generate = False
+        self.force_generate = True
         self.kmeans_n_clusters = 200
         self.pca_n_components = None

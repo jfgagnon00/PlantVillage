@@ -8,8 +8,8 @@ class FeaturesConfig(ABC):
     """
     def __init__(self, executor, chunk_size):
         self.install_path = ""
-        self.force_generate = False
-        self.read_only = True
+        self.force_generate = True
+        self.read_only = False
         self.executor = executor
         self.chunk_size = chunk_size
 
