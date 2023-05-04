@@ -1,4 +1,4 @@
-from .Concurrent import create_thread_pool_executor
+from .Concurrent import create_thread_pool_executor, parallel_for
 from .MetaObject import MetaObject
 from .Profile import Profile
 

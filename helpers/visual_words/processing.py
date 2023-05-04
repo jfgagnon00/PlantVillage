@@ -33,6 +33,7 @@ def _preprocess_bag_model(config, features):
                                        random_state=42)),
                            ("kmeans", MiniBatchKMeans(n_clusters=config.kmeans_n_clusters,
                                                       batch_size=256 * cpu_count(),
+                                                      random_state=42,
                                                       n_init="auto"))])
     return bovw_model.fit(features)
 
