@@ -1,45 +1,15 @@
 Taches pour next milesote
-    # Plan rapport final
+    slides power points (a livrer samedi soir)
+        1. exploration [Michele] 4 minutes
+        2. technique bovw [JFG] 5 minutes
+            2.1 SIFT + PCA
+            2.2 Construction dictionaire + Clustering _ IDF
+            2.3 Construction histograme + TF
+        3. Classification (KNN, Random Forest) [Frederic] 4-5 minutes
+        4. Enrichissement plus [JFG] 2-4 minutes
+            4.1 pipeline de travail, git, hdf5, threading,
 
-    Intro (mettre dans TOC)
-        decrit dataset
-        decrit methode Bag Of Visual Word
+    integrer power point [Michele]
 
-    Pretraitement
-        decrire qu'on a extrait nom de label et de species a partir nom fichiers
+    pratique
 
-    Exploration
-        (rendre plus concis, montrer qu'il y a trop de data et on se restrain a grape)
-        train/test split
-
-    Transformation, Analyse, Visualization
-        feature extraction
-        detailler bag
-        train
-
-    Conclusion/interpretation
-        discuter sur matrice de confusion et pourquoi
-        tf-idf pourquoi
-        ce qui pourrait etre a ameliroer
-            clustering est faible comme partie
-
-    Annexe
-        organisation du travail
-            git
-            pipeline (python et modules), notebook separe
-            hd5
-            versions des environnements (conda, )
-
-
-Objectifs:
-    * Wrapper dans "application" (widgets notebook?)
-
-    * Optimization des hyperparametres (les valeurs qui sont dans config_overrides.json)
-        * choix du type de features (ORB ou SIFT)
-        * determiner nombre de features optimales
-        * Ajouter un label 'Ca marche pas -  inclassifiable'
-
-    * Rapport + presentation
-
-Stretch goal:
-    * Segmentation
