@@ -100,6 +100,10 @@ if __name__ == "__main__":
     # relire le modele pre-entraine
     print("Chargement model")
     configs = hlp.get_configs("config_overrides.json")
+
+    # prevenir changements inoportun dans les configs
+    configs.sift_bovw.force_generate = False
+
     visual_words = VisualWords.from_sift_configs(configs)
 
     print("Initialisation application")
