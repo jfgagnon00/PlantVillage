@@ -30,7 +30,7 @@
         "bovw": {
             "install_path": "models/SiftBoVW.pkl",
             "kmeans_n_clusters": 175,
-            "pca_n_components": 80
+            "pca_n_components": 29
         },
         "dataset_vw": {
             "install_path": "dataset/SiftVW.hd5",
